@@ -1,0 +1,38 @@
+<idea-plugin>
+  <id>com.chainstaysoftware.assertions2assertj</id>
+  <name>Assertions2Assertj</name>
+  <version>1.0</version>
+
+  <description><![CDATA[
+      Plugin to convert Junit 5 and Hamcrest Assertions to AssertJ.
+    ]]></description>
+
+  <change-notes><![CDATA[
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="173.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+    <action id="Assertions2AssertJ.ConvertProject" class="com.chainstaysoftware.testing.ProjectAction"
+            text="Convert Assertions to AssertJ - all Java files" description="Convert Junit 5 and Hamcrest Assertions to AssertJ">
+      <add-to-group group-id="RefactoringMenu" anchor="last" />
+    </action>
+    <action id="Assertions2AssertJ.ConvertFile" class="com.chainstaysoftware.testing.FileAction"
+            text="Convert Assertions to AssertJ - current file" description="Convert Junit 5 and Hamcrest Assertions to AssertJ">
+      <add-to-group group-id="RefactoringMenu" anchor="last" />
+    </action>
+  </actions>
+
+</idea-plugin>
