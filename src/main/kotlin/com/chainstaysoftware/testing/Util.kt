@@ -22,14 +22,16 @@ import java.util.ArrayList
 
 object Util {
    fun traverseTestFiles(project: Project,
-                         iterator: (PsiFile) -> Unit) {
+                         iterator: (PsiFile) -> Unit,
+                         globalSearchScope: GlobalSearchScope? = null) {
       val projectFileIndex = ProjectFileIndex.SERVICE.getInstance(project)
+      val searchScope = globalSearchScope ?: GlobalSearchScope.projectScope(project)
 
       val files = ApplicationManager.getApplication().runReadAction(Computable {
          FileBasedIndex.getInstance().getContainingFiles(
             FileTypeIndex.NAME,
             JavaFileType.INSTANCE,
-            GlobalSearchScope.projectScope(project))
+            searchScope)
             .filter { virtualFile -> projectFileIndex.isInTestSourceContent(virtualFile) }
             .map { virtualFile -> PsiManager.getInstance(project).findFile(virtualFile) }
       })
