@@ -10,6 +10,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiImportList
 import com.intellij.psi.PsiImportStatement
+import com.intellij.psi.PsiImportStaticStatement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiRecursiveElementVisitor
@@ -58,9 +59,36 @@ object Util {
 
       psiImportList
          ?.children
-         ?.filter { it is PsiImportStatement && it.qualifiedName == qualifiedName }
+         ?.filter { qualifiedNamesEqual(it, qualifiedName) }
          ?.forEach { it.delete() }
    }
+
+   fun removeImportStartsWith(psiFile: PsiFile, qualifiedName: String) {
+      val psiImportList = findElement(psiFile, PsiImportList::class.java)
+
+      psiImportList
+         ?.children
+         ?.filter { qualifiedNameStartsWith(it, qualifiedName) }
+         ?.forEach { it.delete() }
+   }
+
+   /**
+    * True if PsiElement is a PsiImportStatement or PsiImportStaticStatement and
+    * the PsiElement's qualified name == the passed in qualifiedName.
+    */
+   private fun qualifiedNamesEqual(psiElement: PsiElement,
+                                   qualifiedName: String) =
+      (psiElement is PsiImportStatement && psiElement.qualifiedName == qualifiedName)
+         || (psiElement is PsiImportStaticStatement && psiElement.importReference?.qualifiedName == qualifiedName)
+
+   /**
+    * True if PsiElement is a PsiImportStatement or PsiImportStaticStatement and
+    * the PsiElement's qualified name starts with the passed in qualifiedName.
+    */
+   private fun qualifiedNameStartsWith(psiElement: PsiElement,
+                                       qualifiedName: String) =
+      (psiElement is PsiImportStatement && psiElement.qualifiedName.toString().startsWith(qualifiedName))
+         || (psiElement is PsiImportStaticStatement && psiElement.importReference?.qualifiedName.toString().startsWith(qualifiedName))
 
    fun <T : PsiElement> findElement(psiElement: PsiElement, clazz: Class<T>): T? {
       val list = findElements(psiElement, clazz)

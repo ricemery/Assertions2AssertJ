@@ -33,7 +33,7 @@ class FileHandler {
       }
 
       if (codeModified) {
-         Util.removeImport(psiFile, "org.hamcrest.MatcherAssert")
+         Util.removeImportStartsWith(psiFile, "org.hamcrest")
          Util.removeImport(psiFile, "org.junit.jupiter.api.Assertions")
          Util.addImport(psiFile.project, psiFile, "org.assertj.core.api.Assertions")
       }
