@@ -22,8 +22,14 @@ import java.util.ArrayList
 
 
 object Util {
+   /**
+    * Traverses a Project looking for files in the test scope.
+    * Running the consumer on each file. A GlobalSearchScope can be
+    * passed in to limit the scope of the traverse. If no GlobalSearchScope
+    * is passed in, then the Project Scope is used.
+    */
    fun traverseTestFiles(project: Project,
-                         iterator: (PsiFile) -> Unit,
+                         consumer: (PsiFile) -> Unit,
                          globalSearchScope: GlobalSearchScope? = null) {
       val projectFileIndex = ProjectFileIndex.SERVICE.getInstance(project)
       val searchScope = globalSearchScope ?: GlobalSearchScope.projectScope(project)
@@ -37,9 +43,12 @@ object Util {
             .map { virtualFile -> PsiManager.getInstance(project).findFile(virtualFile) }
       })
 
-      files.forEach{ psiFile -> if (psiFile != null) iterator(psiFile) }
+      files.forEach{ psiFile -> if (psiFile != null) consumer(psiFile) }
    }
 
+   /**
+    * Adds an import to the passed in psiFile.
+    */
    fun addImport(project: Project, psiFile: PsiFile, qualifiedName: String) {
       val layoutInflaterPsiClass = JavaPsiFacade.getInstance(project).findClass(qualifiedName, GlobalSearchScope.allScope(project))
       val psiImportList = findElement(psiFile, PsiImportList::class.java)
@@ -54,6 +63,9 @@ object Util {
       }
    }
 
+   /**
+    * Removes an import from the passed in psiFile.
+    */
    fun removeImport(psiFile: PsiFile, qualifiedName: String) {
       val psiImportList = findElement(psiFile, PsiImportList::class.java)
 
@@ -63,6 +75,10 @@ object Util {
          ?.forEach { it.delete() }
    }
 
+   /**
+    * Removes all imports from the passed in psiFile that have paths
+    * that start with the passed in qualifiedName.
+    */
    fun removeImportStartsWith(psiFile: PsiFile, qualifiedName: String) {
       val psiImportList = findElement(psiFile, PsiImportList::class.java)
 

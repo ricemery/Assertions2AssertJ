@@ -6,15 +6,20 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiRecursiveElementVisitor
 
 
+/**
+ * Handle converting a single Java file from Hamcrest and Junit 5 Assertions
+ * to AssertJ.
+ */
 class FileHandler {
    private val handlers = listOf(HamcrestHandler(), Junit5Handler())
 
    fun handle(psiFile: PsiFile) {
       var codeModified = false
 
-      for (psiElement in psiFile.children) {
-         if (psiElement is PsiClass) {
-            psiElement.allMethods.forEach { psiMethod ->
+      psiFile.children
+         .filterIsInstance<PsiClass>()
+         .forEach {
+            it.allMethods.forEach { psiMethod ->
                psiMethod.accept(object : PsiRecursiveElementVisitor() {
                   override fun visitElement(psiElement2: PsiElement) {
                      val handler = handlers.firstOrNull { handler -> handler.canHandle(psiElement2) }
@@ -27,10 +32,8 @@ class FileHandler {
                      }
                   }
                })
-
             }
          }
-      }
 
       if (codeModified) {
          Util.removeImportStartsWith(psiFile, "org.hamcrest")

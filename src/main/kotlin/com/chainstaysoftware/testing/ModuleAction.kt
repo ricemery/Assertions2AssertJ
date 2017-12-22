@@ -15,6 +15,9 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.indexing.FileBasedIndex
 
 
+/**
+ * AnAction to convert a single Module.
+ */
 class ModuleAction : AnAction() {
    override fun actionPerformed(event: AnActionEvent) {
       val psiFile = event.getData(PlatformDataKeys.PSI_FILE) ?: return

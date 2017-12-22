@@ -14,6 +14,9 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.indexing.FileBasedIndex
 
 
+/**
+ * AnAction to convert an entire Project.
+ */
 class ProjectAction : AnAction() {
    override fun actionPerformed(event: AnActionEvent) {
       val project = event.getData(PlatformDataKeys.PROJECT) ?: return
