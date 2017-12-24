@@ -47,6 +47,12 @@ object Util {
    }
 
    /**
+    * Determines if qualifiedName is in the classPath of the Project
+    */
+   fun inClasspath(project: Project, qualifiedName: String) =
+      JavaPsiFacade.getInstance(project).findClass(qualifiedName, GlobalSearchScope.allScope(project)) != null
+
+   /**
     * Adds an import to the passed in psiFile.
     */
    fun addImport(project: Project, psiFile: PsiFile, qualifiedName: String) {

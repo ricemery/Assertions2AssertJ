@@ -7,11 +7,11 @@ import com.intellij.psi.PsiRecursiveElementVisitor
 
 
 /**
- * Handle converting a single Java file from Hamcrest and Junit 5 Assertions
+ * Handle converting a single Java file from Hamcrest and Junit Assertions
  * to AssertJ.
  */
 class FileHandler {
-   private val handlers = listOf(HamcrestHandler(), Junit5Handler())
+   private val handlers = listOf(HamcrestHandler(), JunitHandler())
 
    fun handle(psiFile: PsiFile) {
       var codeModified = false
@@ -37,6 +37,7 @@ class FileHandler {
 
       if (codeModified) {
          Util.removeImportStartsWith(psiFile, "org.hamcrest")
+         Util.removeImportStartsWith(psiFile, "org.junit.Assert")
          Util.removeImport(psiFile, "org.junit.jupiter.api.Assertions")
          Util.addImport(psiFile.project, psiFile, "org.assertj.core.api.Assertions")
       }

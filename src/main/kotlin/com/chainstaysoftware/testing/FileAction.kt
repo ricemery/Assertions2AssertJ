@@ -12,6 +12,12 @@ import com.intellij.openapi.command.WriteCommandAction
 class FileAction : AnAction() {
    override fun actionPerformed(event: AnActionEvent) {
       val psiFile = event.getData(PlatformDataKeys.PSI_FILE) ?: return
+
+      if (!Util.inClasspath(psiFile.project, "org.assertj.core.api.Assertions")) {
+         ErrorBalloon().show(psiFile.project, "AssertJ MUST be in the classpath")
+         return
+      }
+
       WriteCommandAction.runWriteCommandAction(psiFile.project) {
          FileHandler().handle(psiFile)
       }

@@ -22,6 +22,12 @@ class ModuleAction : AnAction() {
    override fun actionPerformed(event: AnActionEvent) {
       val psiFile = event.getData(PlatformDataKeys.PSI_FILE) ?: return
       val project = psiFile.project
+
+      if (!Util.inClasspath(project, "org.assertj.core.api.Assertions")) {
+         ErrorBalloon().show(project, "AssertJ MUST be in the classpath")
+         return
+      }
+
       val module = FileIndexFacade.getInstance(project).getModuleForFile(psiFile.virtualFile) ?: return
       val globalSearchScope = GlobalSearchScope.moduleScope(module)
       val numFiles = numFilesToProcess(project, globalSearchScope)

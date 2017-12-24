@@ -4,8 +4,12 @@
   <version>1.0</version>
 
   <description><![CDATA[
-      Plugin to convert Junit 5 and Hamcrest Assertions to AssertJ.
+      Plugin to convert Junit and Hamcrest Assertions to AssertJ.
     ]]></description>
+
+  <vendor url="https://github.com/ricemery/Assertions2AssertJ" />
+
+  <change-notes>Initial release of the plugin.</change-notes>
 
   <change-notes><![CDATA[
     ]]>
@@ -27,13 +31,13 @@
   <actions>
     <group id="Assertions2AssertJ.Group" text="Convert Assertions to AssertJ" popup="true">
       <action id="Assertions2AssertJ.ConvertFile" class="com.chainstaysoftware.testing.FileAction"
-              text="Convert current file" description="Convert Junit 5 and Hamcrest Assertions to AssertJ">
+              text="Convert current file" description="Convert Junit and Hamcrest Assertions to AssertJ">
       </action>
       <action id="Assertions2AssertJ.ConvertModule" class="com.chainstaysoftware.testing.ModuleAction"
-              text="Convert Module" description="Convert Junit 5 and Hamcrest Assertions to AssertJ">
+              text="Convert Module" description="Convert Junit and Hamcrest Assertions to AssertJ">
       </action>
       <action id="Assertions2AssertJ.ConvertProject" class="com.chainstaysoftware.testing.ProjectAction"
-              text="Convert Project" description="Convert Junit 5 and Hamcrest Assertions to AssertJ">
+              text="Convert Project" description="Convert Junit and Hamcrest Assertions to AssertJ">
       </action>
 
       <add-to-group group-id="RefactoringMenu" anchor="last" />
