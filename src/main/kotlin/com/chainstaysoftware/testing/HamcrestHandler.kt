@@ -7,6 +7,7 @@ import com.intellij.psi.PsiExpression
 import com.intellij.psi.PsiExpressionList
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.PsiReferenceExpression
 import com.intellij.psi.impl.source.PsiImmediateClassType
 
 /**
@@ -59,6 +60,7 @@ class HamcrestHandler : AssertHandler {
       return when {
          s == "equalTo(true)" || s == "is(true)" || s == "not(false)" -> "isTrue()"
          s == "equalTo(false)" || s == "is(false)" || s == "not(true)" -> "isFalse()"
+         s == "not(emptyArray())" -> "isNotEmpty()"
          methodName == "equalTo" -> refactor("isEqualTo", methodParams)
          methodName == "closeTo" -> refactorAssertCloseTo(methodParams)
          methodName == "hasItems" -> refactor("contains", methodParams)
@@ -80,6 +82,11 @@ class HamcrestHandler : AssertHandler {
          methodName == "sameInstance" || methodName == "theInstance "-> refactor("isSameAs", methodParams)
          methodName == "startsWith" -> refactor("startsWith", methodParams)
          methodName == "endsWith" -> refactor("endsWith", methodParams)
+         methodName == "allOf" || methodName == "array" -> refactorAllOf(methodParams)
+         methodName == "arrayContaining" -> refactorArrayContaining(methodParams)
+         methodName == "arrayContainingInAnyOrder" -> refactorArrayContainingInAnyOrder(methodParams)
+         methodName == "arrayWithSize" -> refactorArrayWithSize(methodParams)
+         methodName == "emptyArray" -> "isEmpty()"
          else -> s
       }
    }
@@ -126,4 +133,33 @@ class HamcrestHandler : AssertHandler {
       else
          refactor(if (orEqual) "isGreaterThanOrEqual" else "isGreaterThan", expressions)
    }
+
+   private fun refactorAllOf(expressions: Array<PsiExpression>) =
+      expressions.joinToString(".") { expression -> refactorAssertCall(expression) }
+
+   // TODO - better support for collection of matchers - current support is not correct
+   private fun refactorArrayContaining(expressions: Array<PsiExpression>): String =
+      when (expressions[0]) {
+         is PsiReferenceExpression, is PsiLiteralExpression -> "containsExactly(${expressions
+            .joinToString(", ") { expression -> expression.text }})"
+         else -> "containsExactly(${expressions
+            .joinToString(".") { expression -> refactorAssertCall(expression) }})"
+      }
+
+   // TODO - better support for collection of matchers - current support is not correct
+   private fun refactorArrayContainingInAnyOrder(expressions: Array<PsiExpression>): String =
+      when (expressions[0]) {
+         is PsiReferenceExpression, is PsiLiteralExpression -> "contains(${expressions
+            .joinToString(", ") { expression -> expression.text }})"
+         else -> "contains(${expressions
+            .joinToString(".") { expression -> refactorAssertCall(expression) }})"
+      }
+
+   // TODO - better support for collection of matchers - current support is not correct
+   private fun refactorArrayWithSize(expressions: Array<PsiExpression>): String =
+      when (expressions[0]) {
+         is PsiReferenceExpression, is PsiLiteralExpression -> "hasSize(${expressions[0].text})"
+         else -> "hasSize(${expressions
+            .joinToString(".") { expression -> refactorAssertCall(expression) }})"
+      }
 }
