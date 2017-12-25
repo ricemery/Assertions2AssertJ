@@ -72,7 +72,9 @@ class HamcrestHandler : AssertHandler {
          methodName == "instanceOf" -> refactor("isInstanceOf", methodParams)
          methodName == "any" -> refactor("isInstanceOf", methodParams)
          methodName == "lessThan" -> refactorAssertLessThan(methodParams)
+         methodName == "lessThanOrEqualTo" -> refactorAssertLessThan(methodParams, true)
          methodName == "greaterThan" -> refactorAssertGreaterThan(methodParams)
+         methodName == "greaterThanOrEqualTo" -> refactorAssertGreaterThan(methodParams, true)
          methodName == "contains" -> refactor("containsExactly", methodParams)
          methodName == "containsInAnyOrder" -> refactor("containsAll", methodParams)
          methodName == "sameInstance" || methodName == "theInstance "-> refactor("isSameAs", methodParams)
@@ -107,19 +109,21 @@ class HamcrestHandler : AssertHandler {
    private fun refactorNot(expressions: Array<PsiExpression>): String =
       refactorAssertCall(expressions[0]).replaceFirst("is", "isNot")
 
-   private fun refactorAssertLessThan(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertLessThan(expressions: Array<PsiExpression>,
+                                      orEqual: Boolean = false): String {
       val type = expressions[0].type
       return if (type is PsiImmediateClassType && (type.className == "Date" || type.className == "Instant"))
-         refactor("isBefore", expressions)
+         refactor(if (orEqual) "isBeforeOrEqualTo" else "isBefore", expressions)
       else
-         refactor("isLessThan", expressions)
+         refactor(if (orEqual) "isLessThanOrEqualTo" else "isLessThan", expressions)
    }
 
-   private fun refactorAssertGreaterThan(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertGreaterThan(expressions: Array<PsiExpression>,
+                                         orEqual: Boolean = false): String {
       val type = expressions[0].type
       return if (type is PsiImmediateClassType && (type.className == "Date" || type.className == "Instant"))
-         refactor("isAfter", expressions)
+         refactor(if (orEqual) "isAfterOrEqualTo" else "isAfter", expressions)
       else
-         refactor("isGreaterThan", expressions)
+         refactor(if (orEqual) "isGreaterThanOrEqual" else "isGreaterThan", expressions)
    }
 }
