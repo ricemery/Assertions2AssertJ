@@ -75,7 +75,7 @@ class HamcrestHandler : AssertHandler {
          methodName == "greaterThan" -> refactorAssertGreaterThan(methodParams)
          methodName == "contains" -> refactor("containsExactly", methodParams)
          methodName == "containsInAnyOrder" -> refactor("containsAll", methodParams)
-         methodName == "sameInstance" -> refactor("isSameAs", methodParams)
+         methodName == "sameInstance" || methodName == "theInstance "-> refactor("isSameAs", methodParams)
          else -> s
       }
    }
