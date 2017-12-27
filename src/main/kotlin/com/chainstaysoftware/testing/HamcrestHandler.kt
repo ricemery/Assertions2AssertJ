@@ -60,8 +60,10 @@ class HamcrestHandler : AssertHandler {
       return when {
          s == "equalTo(true)" || s == "is(true)" || s == "not(false)" -> "isTrue()"
          s == "equalTo(false)" || s == "is(false)" || s == "not(true)" -> "isFalse()"
-         s == "not(emptyArray())" -> "isNotEmpty()"
+         s == "not(emptyArray())" || s == "not(emptyIterable())" -> "isNotEmpty()"
          methodName == "equalTo" -> refactor("isEqualTo", methodParams)
+         methodName == "equalToIgnoringCase" -> refactor("isEqualToIgnoringCase", methodParams)
+         methodName == "equalToIgnoringWhiteSpace" -> refactor("isEqualToIgnoringWhitespace", methodParams)
          methodName == "closeTo" -> refactorAssertCloseTo(methodParams)
          methodName == "hasItems" -> refactor("contains", methodParams)
          methodName == "hasItem" -> refactor("contains", methodParams)
@@ -87,6 +89,7 @@ class HamcrestHandler : AssertHandler {
          methodName == "arrayContainingInAnyOrder" -> refactorArrayContainingInAnyOrder(methodParams)
          methodName == "arrayWithSize" -> refactorArrayWithSize(methodParams)
          methodName == "emptyArray" -> "isEmpty()"
+         methodName == "emptyIterable" -> "isEmpty()"
          else -> s
       }
    }
