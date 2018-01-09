@@ -2,6 +2,7 @@ package com.chainstaysoftware.testing
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
+import com.intellij.psi.PsiClassObjectAccessExpression
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiExpression
 import com.intellij.psi.PsiExpressionList
@@ -81,7 +82,7 @@ class HamcrestHandler : AssertHandler {
          methodName == "greaterThanOrEqualTo" -> refactorAssertGreaterThan(methodParams, true)
          methodName == "contains" -> refactor("containsExactly", methodParams)
          methodName == "containsInAnyOrder" -> refactor("containsAll", methodParams)
-         methodName == "sameInstance" || methodName == "theInstance "-> refactor("isSameAs", methodParams)
+         methodName == "sameInstance" || methodName == "theInstance"-> refactor("isSameAs", methodParams)
          methodName == "startsWith" -> refactor("startsWith", methodParams)
          methodName == "endsWith" -> refactor("endsWith", methodParams)
          methodName == "allOf" || methodName == "array" -> refactorAllOf(methodParams)
@@ -95,7 +96,7 @@ class HamcrestHandler : AssertHandler {
    }
 
    private fun refactor(methodCall: String, expressions: Array<PsiExpression>): String =
-      "$methodCall(${expressions[0].text})"
+      "$methodCall(${expressions.joinToString(", " ){ e -> e.text }})"
 
    private fun refactorAssertCloseTo(expressions: Array<PsiExpression>): String {
       val expected = expressions[0].text
@@ -103,16 +104,18 @@ class HamcrestHandler : AssertHandler {
       return "isCloseTo(${expected.trim()}, Assertions.offset(${delta.trim()}))"
    }
 
-   // TODO: Better handling for is
+   // TODO: Better handling for is.
    private fun refactorAssertIs(expressions: Array<PsiExpression>): String =
-      if (expressions[0] is PsiLiteralExpression)
-         "isEqualTo(${expressions[0].text})"
-      else {
-         val refactored = refactorAssertCall(expressions[0])
-         if (expressions[0].text == refactored)
-            "isEqualTo(${expressions[0].text})"
-         else
-            refactored
+      when {
+         expressions[0] is PsiClassObjectAccessExpression -> "isInstanceOf(${expressions[0].text})"
+         expressions[0] is PsiLiteralExpression -> "isEqualTo(${expressions[0].text})"
+         else -> {
+            val refactored = refactorAssertCall(expressions[0])
+            if (expressions[0].text == refactored)
+               "isEqualTo(${expressions[0].text})"
+            else
+               refactored
+         }
       }
 
    // TODO: Better handling for Not
@@ -121,8 +124,7 @@ class HamcrestHandler : AssertHandler {
 
    private fun refactorAssertLessThan(expressions: Array<PsiExpression>,
                                       orEqual: Boolean = false): String {
-      val type = expressions[0].type
-      return if (type is PsiImmediateClassType && (type.className == "Date" || type.className == "Instant"))
+      return if (isDateOrInstant(expressions[0]))
          refactor(if (orEqual) "isBeforeOrEqualTo" else "isBefore", expressions)
       else
          refactor(if (orEqual) "isLessThanOrEqualTo" else "isLessThan", expressions)
@@ -130,11 +132,18 @@ class HamcrestHandler : AssertHandler {
 
    private fun refactorAssertGreaterThan(expressions: Array<PsiExpression>,
                                          orEqual: Boolean = false): String {
-      val type = expressions[0].type
-      return if (type is PsiImmediateClassType && (type.className == "Date" || type.className == "Instant"))
+      return if (isDateOrInstant(expressions[0]))
          refactor(if (orEqual) "isAfterOrEqualTo" else "isAfter", expressions)
       else
-         refactor(if (orEqual) "isGreaterThanOrEqual" else "isGreaterThan", expressions)
+         refactor(if (orEqual) "isGreaterThanOrEqualTo" else "isGreaterThan", expressions)
+   }
+
+   private fun isDateOrInstant(expression: PsiExpression): Boolean {
+      val type = expression.type
+      return type is PsiImmediateClassType && (type.className == "Date" || type.className == "Instant")
+         || (expression is PsiMethodCallExpression
+         && ((expression.methodExpression.qualifier as PsiReferenceExpression).text == "Date"
+         || (expression.methodExpression.qualifier as PsiReferenceExpression).text == "Instant"))
    }
 
    private fun refactorAllOf(expressions: Array<PsiExpression>) =
