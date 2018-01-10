@@ -58,20 +58,34 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertEquals()  {
-      assertHandle("org.junit.Assert.assertEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
          "assertEquals(2, 2)",
          "assertThat(2).isEqualTo(2)")
    }
 
    @Test
    fun handleAssertEquals_withDesc()  {
-      assertHandle("org.junit.Assert.assertEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
          "assertEquals(2, 2, \"desc\")",
          "assertThat(2).as(\"desc\").isEqualTo(2)")
    }
 
    @Test
+   fun handleAssertEquals_junit4_withDesc()  {
+      assertHandle("org.junit.Assert.assertEquals",
+         "assertEquals(\"desc\", 2, 2)",
+         "assertThat(2).as(\"desc\").isEqualTo(2)")
+   }
+
+   @Test
    fun handleAssertEquals_withDelta()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+         "assertEquals(2.0, 2.0, 1.0)",
+         "assertThat(2.0).isCloseTo(2.0, offset(1.0))")
+   }
+
+   @Test
+   fun handleAssertEquals_junit4_withDelta()  {
       assertHandle("org.junit.Assert.assertEquals",
          "assertEquals(2.0, 2.0, 1.0)",
          "assertThat(2.0).isCloseTo(2.0, offset(1.0))")
@@ -79,8 +93,15 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertEquals_withDeltaAndDesc()  {
-      assertHandle("org.junit.Assert.assertEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
          "assertEquals(1.0, 1.0, 0.1, \"desc\")",
+         "assertThat(1.0).as(\"desc\").isCloseTo(1.0, offset(0.1))")
+   }
+
+   @Test
+   fun handleAssertEquals_junit4_withDeltaAndDesc()  {
+      assertHandle("org.junit.Assert.assertEquals",
+         "assertEquals(\"desc\", 1.0, 1.0, 0.1)",
          "assertThat(1.0).as(\"desc\").isCloseTo(1.0, offset(0.1))")
    }
 
@@ -100,20 +121,69 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertSame()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+         "assertSame(2, 2)",
+         "assertThat(2).isEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertSame_junit4()  {
       assertHandle("org.junit.Assert.assertSame",
          "assertSame(2, 2)",
          "assertThat(2).isEqualTo(2)")
    }
 
    @Test
+   fun handleAssertSame_withDesc()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+         "assertSame(2, 2, \"foo\")",
+         "assertThat(2).as(\"foo\").isEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertSame_junit4_withDesc()  {
+      assertHandle("org.junit.Assert.assertSame",
+         "assertSame(\"foo\", 2, 2)",
+         "assertThat(2).as(\"foo\").isEqualTo(2)")
+   }
+
+   @Test
    fun handleAssertNotSame()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+         "assertNotSame(2, 2)",
+         "assertThat(2).isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertNotSame_junit4()  {
       assertHandle("org.junit.Assert.assertNotSame",
          "assertNotSame(2, 2)",
          "assertThat(2).isNotEqualTo(2)")
    }
 
    @Test
+   fun handleAssertNotSame_withDesc()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+         "assertNotSame(2, 2, \"foo\")",
+         "assertThat(2).as(\"foo\").isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertNotSame_junit4_withDesc()  {
+      assertHandle("org.junit.Assert.assertNotSame",
+         "assertNotSame(\"foo\", 2, 2)",
+         "assertThat(2).as(\"foo\").isNotEqualTo(2)")
+   }
+
+   @Test
    fun handleAssertArrayEquals()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+         "assertArrayEquals(new int[]{}, new int[]{})",
+         "assertThat(new int[]{}).isEqualTo(new int[]{})")
+   }
+
+   @Test
+   fun handleAssertArrayEquals_junit4()  {
       assertHandle("org.junit.Assert.assertArrayEquals",
          "assertArrayEquals(new int[]{}, new int[]{})",
          "assertThat(new int[]{}).isEqualTo(new int[]{})")
@@ -121,13 +191,27 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertArrayEquals_withDesc()  {
-      assertHandle("org.junit.Assert.assertArrayEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertArrayEquals",
          "assertArrayEquals(new int[]{}, new int[]{}, \"desc\")",
          "assertThat(new int[]{}).as(\"desc\").isEqualTo(new int[]{})")
    }
 
    @Test
+   fun handleAssertArrayEquals_junit4_withDesc()  {
+      assertHandle("org.junit.Assert.assertArrayEquals",
+         "assertArrayEquals(\"desc\", new int[]{}, new int[]{})",
+         "assertThat(new int[]{}).as(\"desc\").isEqualTo(new int[]{})")
+   }
+
+   @Test
    fun handleAssertArrayEquals_withDelta()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertArrayEquals",
+         "assertArrayEquals(new int[]{}, new int[]{}, 1.0)",
+         "assertThat(new int[]{}).contains(new int[]{}, offset(1.0))")
+   }
+
+   @Test
+   fun handleAssertArrayEquals_junit4_withDelta()  {
       assertHandle("org.junit.Assert.assertArrayEquals",
          "assertArrayEquals(new int[]{}, new int[]{}, 1.0)",
          "assertThat(new int[]{}).contains(new int[]{}, offset(1.0))")
@@ -135,34 +219,48 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertArrayEquals_withDeltaAndDesc()  {
-      assertHandle("org.junit.Assert.assertArrayEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertArrayEquals",
          "assertArrayEquals(new int[]{}, new int[]{}, 1.0, \"desc\")",
          "assertThat(new int[]{}).as(\"desc\").contains(new int[]{}, offset(1.0))")
    }
 
    @Test
+   fun handleAssertArrayEquals_junit4_withDeltaAndDesc()  {
+      assertHandle("org.junit.Assert.assertArrayEquals",
+         "assertArrayEquals(\"desc\", new double[]{}, new double[]{}, 1.0)",
+         "assertThat(new double[]{}).as(\"desc\").contains(new double[]{}, offset(1.0))")
+   }
+
+   @Test
    fun handleAssertIterableEquals()  {
-      assertHandle("org.junit.Assert.assertIterableEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertIterableEquals",
          "assertIterableEquals(new List(), new List())",
          "assertThat(new List()).isEqualTo(new List())")
    }
 
    @Test
    fun handleAssertIterableEquals_withDesc()  {
-      assertHandle("org.junit.Assert.assertIterableEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertIterableEquals",
          "assertIterableEquals(new List(), new List(), \"desc\")",
          "assertThat(new List()).as(\"desc\").isEqualTo(new List())")
    }
 
    @Test
    fun handleAssertLinesMatch()  {
-      assertHandle("org.junit.Assert.assertIterableEquals",
+      assertHandle("org.junit.Assert.assertLinesMatch",
          "assertLinesMatch(new List(), new List())",
          "assertThat(new List()).isEqualTo(new List())")
    }
 
    @Test
    fun handleAssertTrue()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertTrue",
+         "assertTrue(a)",
+         "assertThat(a).isTrue()")
+   }
+
+   @Test
+   fun handleAssertTrue_junit4()  {
       assertHandle("org.junit.Assert.assertTrue",
          "assertTrue(a)",
          "assertThat(a).isTrue()")
@@ -170,13 +268,27 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertTrue_withDesc()  {
-      assertHandle("org.junit.Assert.assertTrue",
+      assertHandle("org.junit.jupiter.api.Assertions.assertTrue",
          "assertTrue(a, \"desc\")",
          "assertThat(a).as(\"desc\").isTrue()")
    }
 
    @Test
+   fun handleAssertTrue_junit4_withDesc()  {
+      assertHandle("org.junit.Assert.assertTrue",
+         "assertTrue(\"desc\", a)",
+         "assertThat(a).as(\"desc\").isTrue()")
+   }
+
+   @Test
    fun handleAssertFalse()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertFalse",
+         "assertFalse(a)",
+         "assertThat(a).isFalse()")
+   }
+
+   @Test
+   fun handleAssertFalse_junit4()  {
       assertHandle("org.junit.Assert.assertFalse",
          "assertFalse(a)",
          "assertThat(a).isFalse()")
@@ -184,13 +296,27 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertFalse_withDesc()  {
-      assertHandle("org.junit.Assert.assertFalse",
+      assertHandle("org.junit.jupiter.api.Assertions.assertFalse",
          "assertFalse(a, \"desc\")",
          "assertThat(a).as(\"desc\").isFalse()")
    }
 
    @Test
+   fun handleAssertFalse_junit4_withDesc()  {
+      assertHandle("org.junit.Assert.assertFalse",
+         "assertFalse(\"desc\", a)",
+         "assertThat(a).as(\"desc\").isFalse()")
+   }
+
+   @Test
    fun handleAssertNull()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertNull",
+         "assertNull(a)",
+         "assertThat(a).isNull()")
+   }
+
+   @Test
+   fun handleAssertNull_junit4()  {
       assertHandle("org.junit.Assert.assertNull",
          "assertNull(a)",
          "assertThat(a).isNull()")
@@ -198,13 +324,27 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertNull_withDesc()  {
-      assertHandle("org.junit.Assert.assertNull",
+      assertHandle("org.junit.jupiter.api.Assertions.assertNull",
          "assertNull(a, \"desc\")",
          "assertThat(a).as(\"desc\").isNull()")
    }
 
    @Test
+   fun handleAssertNull_junit4_withDesc()  {
+      assertHandle("org.junit.Assert.assertNull",
+         "assertNull(\"desc\", a)",
+         "assertThat(a).as(\"desc\").isNull()")
+   }
+
+   @Test
    fun handleAssertNotNull()  {
+      assertHandle("org.junit.jupiter.api.Assertions.assertNotNull",
+         "assertNotNull(a)",
+         "assertThat(a).isNotNull()")
+   }
+
+   @Test
+   fun handleAssertNotNull_junit4()  {
       assertHandle("org.junit.Assert.assertNotNull",
          "assertNotNull(a)",
          "assertThat(a).isNotNull()")
@@ -212,8 +352,15 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertNotNull_withDesc()  {
-      assertHandle("org.junit.Assert.assertNotNull",
+      assertHandle("org.junit.jupiter.api.Assertions.assertNotNull",
          "assertNotNull(a, \"desc\")",
+         "assertThat(a).as(\"desc\").isNotNull()")
+   }
+
+   @Test
+   fun handleAssertNotNull_junit4_withDesc()  {
+      assertHandle("org.junit.Assert.assertNotNull",
+         "assertNotNull(\"desc\", a)",
          "assertThat(a).as(\"desc\").isNotNull()")
    }
 

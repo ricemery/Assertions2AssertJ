@@ -11,20 +11,20 @@ import com.intellij.psi.PsiStatement
  * Handler to convert Junit Assertions (excluding assertThat) to AssertJ Assertions.
  */
 class JunitHandler : AssertHandler {
-   private val refactorMap: Map<String, (Array<PsiExpression>) -> String?>
-      = mapOf("assertEquals" to { expression -> refactorAssertEquals(expression) },
-      "assertNotEquals" to { expression -> refactorAssertNotEquals(expression) },
-      "assertSame" to { expression -> refactorAssertEquals(expression) },
-      "assertNotSame" to { expression -> refactorAssertNotEquals(expression) },
-      "assertArrayEquals" to { expression -> refactorAssertArrayEquals(expression) },
-      "assertIterableEquals" to { expression -> refactorAssertIterableEquals(expression) },
-      "assertLinesMatch" to { expression -> refactorAssertIterableEquals(expression) },
-      "assertTrue" to { expression -> refactorAssertTrue(expression) },
-      "assertFalse" to { expression -> refactorAssertFalse(expression) },
-      "assertNull" to { expression -> refactorAssertNull(expression) },
-      "assertNotNull" to { expression -> refactorAssertNotNull(expression) },
-      "assertThrows" to { expression -> refactorAssertThrows(expression) },
-      "fail" to { expression -> refactorFail(expression) })
+   private val refactorMap: Map<String, (Boolean, Array<PsiExpression>) -> String?>
+      = mapOf("assertEquals" to { junit4, expressions -> refactorAssertEquals(junit4, expressions) },
+      "assertNotEquals" to { junit4, expressions -> refactorAssertNotEquals(junit4, expressions) },
+      "assertSame" to { junit4, expressions -> refactorAssertEquals(junit4, expressions) },
+      "assertNotSame" to { junit4, expressions -> refactorAssertNotEquals(junit4, expressions) },
+      "assertArrayEquals" to { junit4, expressions -> refactorAssertArrayEquals(junit4, expressions) },
+      "assertIterableEquals" to { _, expressions -> refactorAssertIterableEquals(expressions) },
+      "assertLinesMatch" to { _, expressions -> refactorAssertIterableEquals(expressions) },
+      "assertTrue" to { junit4, expressions -> refactorAssertTrue(junit4, expressions) },
+      "assertFalse" to { junit4, expressions -> refactorAssertFalse(junit4, expressions) },
+      "assertNull" to { junit4, expressions -> refactorAssertNull(junit4, expressions) },
+      "assertNotNull" to { junit4, expressions -> refactorAssertNotNull(junit4, expressions) },
+      "assertThrows" to { junit4, expressions -> refactorAssertThrows(expressions) },
+      "fail" to { _, expressions -> refactorFail(expressions) })
 
    override fun canHandle(psiElement: PsiElement): Boolean =
       isQualifiedClass(psiElement, "org.junit.jupiter.api.Assertions") ||
@@ -34,21 +34,22 @@ class JunitHandler : AssertHandler {
 
    override fun handle(project: Project, psiElement: PsiElement): Set<Pair<String, String>> =
       psiElement.children.map { child ->
-            refactorJunit5(project, psiElement, child)
+            refactorJunit(project, psiElement, child)
          }
          .flatten()
          .toSet()
 
-   private fun refactorJunit5(project: Project,
-                              junitAssertElement: PsiElement,
-                              childElement: PsiElement?): Set<Pair<String, String>> {
+   private fun refactorJunit(project: Project,
+                             junitAssertElement: PsiElement,
+                             childElement: PsiElement?): Set<Pair<String, String>> {
       val emptyImports = hashSetOf<Pair<String, String>>()
       if (childElement is PsiExpressionList) {
          val methodName = Util.getMethodName(junitAssertElement) ?: return emptyImports
 
+         val isJunit4 = Util.getClassName(junitAssertElement) == "Assert"
          val expressions = childElement.expressions
-         val newExpressionStr = refactorMap.getOrDefault(methodName, { _ -> null })
-            .invoke(expressions) ?: return emptyImports
+         val newExpressionStr = refactorMap.getOrDefault(methodName, { _, _ -> null })
+            .invoke(isJunit4, expressions) ?: return emptyImports
 
          val elementFactory = JavaPsiFacade.getElementFactory(project)
          val newExpression = elementFactory
@@ -69,14 +70,34 @@ class JunitHandler : AssertHandler {
          hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"))
    }
 
-   private fun refactorAssertEquals(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertEquals(junit4: Boolean, expressions: Array<PsiExpression>): String {
       return when {
-         expressions.size == 4 -> {
-            val expected = expressions[0].text
-            val actual = expressions[1].text
-            val delta = expressions[2].text
-            val desc = expressions[3].text
+         junit4 && expressions.size == 4 -> {
+            val expected = expressions[1].text
+            val actual = expressions[2].text
+            val delta = expressions[3].text
+            val desc = expressions[0].text
             assertStr(actual, "isCloseTo(${expected.trim()}, offset(${delta.trim()}))", desc)
+         }
+         expressions.size == 4 -> {
+            val expected = if (junit4) expressions[1].text else expressions[0].text
+            val actual = if (junit4) expressions[2].text else expressions[1].text
+            val delta = if (junit4) expressions[3].text else expressions[2].text
+            val desc = if (junit4) expressions[0].text else expressions[3].text
+            assertStr(actual, "isCloseTo(${expected.trim()}, offset(${delta.trim()}))", desc)
+         }
+         junit4 && expressions.size == 3 -> {
+            if ("PsiType:String" == expressions[0].type.toString()) {
+               val desc = expressions[0].text
+               val expected = expressions[1].text
+               val actual = expressions[2].text
+               assertStr(actual, "isEqualTo(" + expected.trim() + ")", desc)
+            } else {
+               val expected = expressions[0].text
+               val actual = expressions[1].text
+               val delta = expressions[2].text
+               assertStr(actual, "isCloseTo(${expected.trim()}, offset(${delta.trim()}))")
+            }
          }
          expressions.size == 3 -> {
             val expected = expressions[0].text
@@ -97,8 +118,14 @@ class JunitHandler : AssertHandler {
       }
    }
 
-   private fun refactorAssertNotEquals(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertNotEquals(junit4: Boolean, expressions: Array<PsiExpression>): String {
       return when {
+         junit4 && expressions.size == 3 -> {
+            val desc = expressions[0].text
+            val expected = expressions[1].text
+            val actual = expressions[2].text
+            assertStr(actual, "isNotEqualTo(" + expected.trim() + ")", desc)
+         }
          expressions.size == 3 -> {
             val expected = expressions[0].text
             val actual = expressions[1].text
@@ -113,14 +140,34 @@ class JunitHandler : AssertHandler {
       }
    }
 
-   private fun refactorAssertArrayEquals(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertArrayEquals(junit4: Boolean, expressions: Array<PsiExpression>): String {
       return when {
+         junit4 && expressions.size == 4 -> {
+            val desc = expressions[0].text
+            val expected = expressions[1].text
+            val actual = expressions[2].text
+            val delta = expressions[3].text
+            assertStr(actual, "contains(${expected.trim()}, offset(${delta.trim()}))", desc)
+         }
          expressions.size == 4 -> {
             val expected = expressions[0].text
             val actual = expressions[1].text
             val delta = expressions[2].text
             val desc = expressions[3].text
             assertStr(actual, "contains(${expected.trim()}, offset(${delta.trim()}))", desc)
+         }
+         junit4 && expressions.size == 3 -> {
+            if ("PsiType:String" == expressions[0].type.toString()) {
+               val desc = expressions[0].text
+               val expected = expressions[1].text
+               val actual = expressions[2].text
+               assertStr(actual, "isEqualTo(" + expected.trim() + ")", desc)
+            } else {
+               val expected = expressions[0].text
+               val actual = expressions[1].text
+               val delta = expressions[2].text
+               assertStr(actual, "contains(${expected.trim()}, offset(${delta.trim()}))")
+            }
          }
          expressions.size == 3 -> {
             val expected = expressions[0].text
@@ -157,8 +204,13 @@ class JunitHandler : AssertHandler {
       }
    }
 
-   private fun refactorAssertTrue(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertTrue(junit4: Boolean, expressions: Array<PsiExpression>): String {
       return when {
+         junit4 && expressions.size == 2 -> {
+            val desc = expressions[0].text
+            val actual = expressions[1].text
+            assertStr(actual, "isTrue()", desc)
+         }
          expressions.size == 2 -> {
             val actual = expressions[0].text
             val desc = expressions[1].text
@@ -171,8 +223,13 @@ class JunitHandler : AssertHandler {
       }
    }
 
-   private fun refactorAssertFalse(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertFalse(junit4: Boolean, expressions: Array<PsiExpression>): String {
       return when {
+         junit4 && expressions.size == 2 -> {
+            val desc = expressions[0].text
+            val actual = expressions[1].text
+            assertStr(actual, "isFalse()", desc)
+         }
          expressions.size == 2 -> {
             val actual = expressions[0].text
             val desc = expressions[1].text
@@ -185,8 +242,13 @@ class JunitHandler : AssertHandler {
       }
    }
 
-   private fun refactorAssertNull(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertNull(junit4: Boolean, expressions: Array<PsiExpression>): String {
       return when {
+         junit4 && expressions.size == 2 -> {
+            val desc = expressions[0].text
+            val actual = expressions[1].text
+            assertStr(actual, "isNull()", desc)
+         }
          expressions.size == 2 -> {
             val actual = expressions[0].text
             val desc = expressions[1].text
@@ -199,8 +261,13 @@ class JunitHandler : AssertHandler {
       }
    }
 
-   private fun refactorAssertNotNull(expressions: Array<PsiExpression>): String {
+   private fun refactorAssertNotNull(junit4: Boolean, expressions: Array<PsiExpression>): String {
       return when {
+         junit4 && expressions.size == 2 -> {
+            val desc = expressions[0].text
+            val actual = expressions[1].text
+            assertStr(actual, "isNotNull()", desc)
+         }
          expressions.size == 2 -> {
             val actual = expressions[0].text
             val desc = expressions[1].text

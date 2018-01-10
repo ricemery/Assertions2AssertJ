@@ -166,4 +166,10 @@ object Util {
          MethodCallUtils.getMethodName(element)
       else
          null
+
+   fun getClassName(element: PsiElement): String? =
+      if (element is PsiMethodCallExpression)
+         element.resolveMethod()?.containingClass?.name
+      else
+         null
 }
