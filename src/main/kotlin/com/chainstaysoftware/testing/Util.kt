@@ -70,6 +70,33 @@ object Util {
    }
 
    /**
+    * Adds a static import to the passed in psiFile.
+    */
+   fun addStaticImport(project: Project, psiFile: PsiFile, qualifiedName: String) {
+      addStaticImport(project, psiFile, qualifiedName, "*")
+   }
+
+   /**
+    * Adds a static import to the passed in psiFile.
+    */
+   fun addStaticImport(project: Project, psiFile: PsiFile, qualifiedName: String, referenceName: String) {
+      val layoutInflaterPsiClass = JavaPsiFacade.getInstance(project).findClass(qualifiedName, GlobalSearchScope.allScope(project))
+      val psiImportList = findElement(psiFile, PsiImportList::class.java)
+
+      if (psiImportList != null) {
+         if (psiImportList.children.any { i -> i is PsiImportStaticStatement
+            && i.resolveTargetClass()!!.qualifiedName == qualifiedName
+            && i.referenceName == if (referenceName == "*") null else referenceName }) {
+            // we already have the reference, do not add it
+            return
+         }
+
+         psiImportList.add(JavaPsiFacade.getElementFactory(project)
+            .createImportStaticStatement(layoutInflaterPsiClass!!, referenceName))
+      }
+   }
+
+   /**
     * Removes an import from the passed in psiFile.
     */
    fun removeImport(psiFile: PsiFile, qualifiedName: String) {

@@ -15,17 +15,20 @@ class FileHandler {
 
    fun handle(psiFile: PsiFile) {
       var codeModified = false
+      val imports = mutableSetOf<Pair<String, String>>()
 
       psiFile.children
          .filterIsInstance<PsiClass>()
          .forEach {
+
             it.allMethods.forEach { psiMethod ->
                psiMethod.accept(object : PsiRecursiveElementVisitor() {
                   override fun visitElement(psiElement: PsiElement) {
                      val handler = handlers.firstOrNull { handler -> handler.canHandle(psiElement) }
                      when {
                         handler != null -> {
-                           handler.handle(psiFile.project, psiElement)
+                           val imps = handler.handle(psiFile.project, psiElement)
+                           imports.addAll(imps)
                            codeModified = true
                         }
                         else -> super.visitElement(psiElement)
@@ -39,7 +42,10 @@ class FileHandler {
          Util.removeImportStartsWith(psiFile, "org.hamcrest")
          Util.removeImportStartsWith(psiFile, "org.junit.Assert")
          Util.removeImport(psiFile, "org.junit.jupiter.api.Assertions")
-         Util.addImport(psiFile.project, psiFile, "org.assertj.core.api.Assertions")
+
+         imports.forEach { import ->
+            Util.addStaticImport(psiFile.project, psiFile, import.first, import.second)
+         }
       }
    }
 }

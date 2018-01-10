@@ -60,7 +60,7 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleAssertEquals()  {
       assertHandle("org.junit.Assert.assertEquals",
          "assertEquals(2, 2)",
-         "Assertions.assertThat(2).isEqualTo(2)")
+         "assertThat(2).isEqualTo(2)")
    }
 
    private fun assertCanHandle(import: String,

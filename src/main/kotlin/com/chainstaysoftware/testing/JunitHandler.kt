@@ -5,7 +5,7 @@ import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiExpression
 import com.intellij.psi.PsiExpressionList
-import com.intellij.psi.PsiType
+import com.intellij.psi.PsiStatement
 
 /**
  * Handler to convert Junit Assertions (excluding assertThat) to AssertJ Assertions.
@@ -29,30 +29,41 @@ class JunitHandler : AssertHandler {
             "assertThat" != Util.getMethodName(psiElement))
 
 
-   override fun handle(project: Project, psiElement: PsiElement) {
-      psiElement.children.forEach { child ->
-         refactorJunit5(project, psiElement, child)
-      }
-   }
+   override fun handle(project: Project, psiElement: PsiElement): Set<Pair<String, String>> =
+      psiElement.children.map { child ->
+            refactorJunit5(project, psiElement, child)
+         }
+         .flatten()
+         .toSet()
 
    private fun refactorJunit5(project: Project,
                               junitAssertElement: PsiElement,
-                              childElement: PsiElement?) {
+                              childElement: PsiElement?): Set<Pair<String, String>> {
+      val emptyImports = hashSetOf<Pair<String, String>>()
       if (childElement is PsiExpressionList) {
-         val methodName = Util.getMethodName(junitAssertElement) ?: return
+         val methodName = Util.getMethodName(junitAssertElement) ?: return emptyImports
 
          val expressions = childElement.expressions
          val newExpressionStr = refactorMap.getOrDefault(methodName, { _ -> null })
-            .invoke(expressions)
+            .invoke(expressions) ?: return emptyImports
 
+         val elementFactory = JavaPsiFacade.getElementFactory(project)
+         val newExpression = elementFactory
+            .createStatementFromText(newExpressionStr, null)
+         junitAssertElement.replace(newExpression)
 
-         if (newExpressionStr != null) {
-            val elementFactory = JavaPsiFacade.getElementFactory(project)
-            val newExpression = elementFactory
-               .createStatementFromText(newExpressionStr, null)
-            junitAssertElement.replace(newExpression)
-         }
+         return getStaticImports(newExpression)
+      } else {
+         return emptyImports
       }
+   }
+
+   private fun getStaticImports(newExpression: PsiStatement): Set<Pair<String, String>> {
+      return if (newExpression.text.contains("offset(")) {
+         hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"),
+            Pair("org.assertj.core.api.Assertions", "offset"))
+      } else
+         hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"))
    }
 
    private fun refactorAssertEquals(expressions: Array<PsiExpression>): String {
@@ -62,17 +73,17 @@ class JunitHandler : AssertHandler {
             val actual = expressions[1].text
             val delta = expressions[2].text
             val desc = expressions[3].text
-            assertStr(actual, "isCloseTo(${expected.trim()}, Assertions.offset(${delta.trim()}))", desc)
+            assertStr(actual, "isCloseTo(${expected.trim()}, offset(${delta.trim()}))", desc)
          }
          expressions.size == 3 -> {
             val expected = expressions[0].text
             val actual = expressions[1].text
-            if (expressions[2].type == PsiType.DOUBLE) {
-               val delta = expressions[2].text
-               assertStr(actual, "isCloseTo(${expected.trim()}, Assertions.offset(${delta.trim()}))")
-            } else {
+            if ("PsiType:String" == expressions[0].type.toString()) {
                val desc = expressions[2].text
                assertStr(actual, "isEqualTo(" + expected.trim() + ")", desc)
+            } else {
+               val delta = expressions[2].text
+               assertStr(actual, "isCloseTo(${expected.trim()}, offset(${delta.trim()}))")
             }
          }
          else -> {
@@ -106,17 +117,17 @@ class JunitHandler : AssertHandler {
             val actual = expressions[1].text
             val delta = expressions[2].text
             val desc = expressions[3].text
-            assertStr(actual, "contains(${expected.trim()}, Assertions.offset(${delta.trim()}))", desc)
+            assertStr(actual, "contains(${expected.trim()}, offset(${delta.trim()}))", desc)
          }
          expressions.size == 3 -> {
             val expected = expressions[0].text
             val actual = expressions[1].text
-            if (expressions[2].type == PsiType.DOUBLE) {
-               val delta = expressions[2].text
-               assertStr(actual, "contains(${expected.trim()}, Assertions.offset(${delta.trim()}))")
-            } else {
+            if ("PsiType:String" == expressions[0].type.toString()) {
                val desc = expressions[2].text
                assertStr(actual, "isEqualTo(" + expected.trim() + ")", desc)
+            } else {
+               val delta = expressions[2].text
+               assertStr(actual, "contains(${expected.trim()}, offset(${delta.trim()}))")
             }
          }
          else -> {
@@ -189,12 +200,12 @@ class JunitHandler : AssertHandler {
             val expected = expressions[0].text
             val actual = expressions[1].text
             val desc = expressions[2].text
-            "Assertions.assertThatExceptionOfType(${expected.trim()}).as(${desc.trim()}).isThrownBy(${actual.trim()})"
+            "assertThatExceptionOfType(${expected.trim()}).as(${desc.trim()}).isThrownBy(${actual.trim()})"
          }
          else -> {
             val expected = expressions[0].text
             val actual = expressions[1].text
-            "Assertions.assertThatExceptionOfType(${expected.trim()}).isThrownBy(${actual.trim()})"
+            "assertThatExceptionOfType(${expected.trim()}).isThrownBy(${actual.trim()})"
          }
       }
    }
@@ -203,7 +214,7 @@ class JunitHandler : AssertHandler {
                          assertExpression: String,
                          description: String? = null) =
       if (description == null)
-         "Assertions.assertThat(${actual.trim()}).$assertExpression"
+         "assertThat(${actual.trim()}).$assertExpression"
       else
-         "Assertions.assertThat(${actual.trim()}).as(${description.trim()}).$assertExpression"
+         "assertThat(${actual.trim()}).as(${description.trim()}).$assertExpression"
 }

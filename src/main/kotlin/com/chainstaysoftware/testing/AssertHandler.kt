@@ -15,8 +15,11 @@ interface AssertHandler {
 
    /**
     * Converts the {@link PsiElement}. Will only be called if canHandle return true.
+    * Implementers should return a list of static imports. The Pair that contains a single
+    * import should contain the full package including the class name in the first element.
+    * The second element of the pair should include the method name to import.
     */
-   fun handle(project: Project, psiElement: PsiElement)
+   fun handle(project: Project, psiElement: PsiElement): Set<Pair<String, String>>
 
    /**
     * Returns true if the passed in {@link PsiElement} is

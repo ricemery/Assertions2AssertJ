@@ -9,6 +9,7 @@ import com.intellij.psi.PsiExpressionList
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiReferenceExpression
+import com.intellij.psi.PsiStatement
 import com.intellij.psi.impl.source.PsiImmediateClassType
 import com.intellij.psi.util.PsiTreeUtil
 
@@ -69,23 +70,28 @@ class HamcrestHandler : AssertHandler {
          .any { elem -> isQualifiedClass(elem, "org.hamcrest.CoreMatchers")
             || isQualifiedClass(elem, "org.hamcrest.Matchers")}
 
-   override fun handle(project: Project, psiElement: PsiElement) {
+   override fun handle(project: Project, psiElement: PsiElement): Set<Pair<String, String>> {
+      val imports = mutableSetOf<Pair<String, String>>()
+
       psiElement.children
          .filter { child -> child is PsiExpressionList }
          .forEach { child ->
-            refactorHamcrest(project, psiElement, child as PsiExpressionList)
+            val imps = refactorHamcrest(project, psiElement, child as PsiExpressionList)
+            imports.addAll(imps)
          }
+
+      return imports
    }
 
    private fun refactorHamcrest(project: Project,
                                 matcherAssertElement: PsiElement,
-                                childElement: PsiExpressionList) {
+                                childElement: PsiExpressionList): Set<Pair<String, String>> {
          val expressions = childElement.expressions
          val newExpressionStr = when {
-            expressions.size == 3 -> "Assertions.assertThat(${expressions[1].text.trim()})" +
+            expressions.size == 3 -> "assertThat(${expressions[1].text.trim()})" +
                ".as(${expressions[0].text.trim()})" +
                ".${refactorAssertCall(expressions[2])}"
-            expressions.size == 2 -> "Assertions.assertThat(${expressions[0].text.trim()})" +
+            expressions.size == 2 -> "assertThat(${expressions[0].text.trim()})" +
                ".${refactorAssertCall(expressions[1])}"
             else -> null
          }
@@ -95,6 +101,10 @@ class HamcrestHandler : AssertHandler {
             val newExpression = elementFactory
                .createStatementFromText(newExpressionStr, null)
             matcherAssertElement.replace(newExpression)
+
+            return getStaticImports(newExpression)
+         } else {
+            return hashSetOf()
          }
    }
 
@@ -154,7 +164,7 @@ class HamcrestHandler : AssertHandler {
    private fun refactorAssertCloseTo(expressions: Array<PsiExpression>): String {
       val expected = expressions[0].text
       val delta = expressions[1].text
-      return "isCloseTo(${expected.trim()}, Assertions.offset(${delta.trim()}))"
+      return "isCloseTo(${expected.trim()}, offset(${delta.trim()}))"
    }
 
    private fun refactorAssertIs(expressions: Array<PsiExpression>): String =
@@ -222,4 +232,12 @@ class HamcrestHandler : AssertHandler {
          else -> "hasSize(${expressions
             .joinToString(".") { expression -> refactorAssertCall(expression) }})"
       }
+
+   private fun getStaticImports(newExpression: PsiStatement): Set<Pair<String, String>> {
+      return if (newExpression.text.contains("offset(")) {
+         hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"),
+            Pair("org.assertj.core.api.Assertions", "offset"))
+      } else
+         hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"))
+   }
 }

@@ -6,7 +6,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.testFramework.PsiTestUtil
 import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase
 import com.intellij.util.PathUtil
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers
 import org.junit.Assert
@@ -118,91 +118,91 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_equalToTrue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", true, equalTo(true))",
-         "Assertions.assertThat(true).as(\"foo\").isTrue()")
+         "assertThat(true).as(\"foo\").isTrue()")
    }
 
    @Test
    fun handleMatcherAssert_equalToFalse()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", false, equalTo(false))",
-         "Assertions.assertThat(false).as(\"foo\").isFalse()")
+         "assertThat(false).as(\"foo\").isFalse()")
    }
 
    @Test
    fun handleMatcherAssert_isTrue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", true, is(true))",
-         "Assertions.assertThat(true).as(\"foo\").isTrue()")
+         "assertThat(true).as(\"foo\").isTrue()")
    }
 
    @Test
    fun handleMatcherAssert_isFalse()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", false, is(false))",
-         "Assertions.assertThat(false).as(\"foo\").isFalse()")
+         "assertThat(false).as(\"foo\").isFalse()")
    }
 
    @Test
    fun handleMatcherAssert_notTrue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", true, not(true))",
-         "Assertions.assertThat(true).as(\"foo\").isFalse()")
+         "assertThat(true).as(\"foo\").isFalse()")
    }
 
    @Test
    fun handleMatcherAssert_notFalse()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", true, not(false))",
-         "Assertions.assertThat(true).as(\"foo\").isTrue()")
+         "assertThat(true).as(\"foo\").isTrue()")
    }
 
    @Test
    fun handleMatcherAssert_notEmptyArray()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", new byte[]{}, not(emptyArray()))",
-         "Assertions.assertThat(new byte[]{}).as(\"foo\").isNotEmpty()")
+         "assertThat(new byte[]{}).as(\"foo\").isNotEmpty()")
    }
 
    @Test
    fun handleMatcherAssert_notEmptyIterable()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", new byte[]{}, not(emptyIterable()))",
-         "Assertions.assertThat(new byte[]{}).as(\"foo\").isNotEmpty()")
+         "assertThat(new byte[]{}).as(\"foo\").isNotEmpty()")
    }
 
    @Test
    fun handleMatcherAssert_equalTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, equalTo(2))",
-         "Assertions.assertThat(2).as(\"foo\").isEqualTo(2)")
+         "assertThat(2).as(\"foo\").isEqualTo(2)")
    }
 
    @Test
    fun handleMatcherAssert_equalToIgnoreCase()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", \"fOObar\", equalToIgnoringCase(\"foobar\"))",
-         "Assertions.assertThat(\"fOObar\").as(\"foo\").isEqualToIgnoringCase(\"foobar\")")
+         "assertThat(\"fOObar\").as(\"foo\").isEqualToIgnoringCase(\"foobar\")")
    }
 
    @Test
    fun handleMatcherAssert_equalToIgnoreWhitespace()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", \"fOO\tbar\", equalToIgnoringWhiteSpace(\"foobar\"))",
-         "Assertions.assertThat(\"fOO\tbar\").as(\"foo\").isEqualToIgnoringWhitespace(\"foobar\")")
+         "assertThat(\"fOO\tbar\").as(\"foo\").isEqualToIgnoringWhitespace(\"foobar\")")
    }
 
    @Test
    fun handleMatcherAssert_closeTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2.0, closeTo(2.0, 0.0001))",
-         "Assertions.assertThat(2.0).as(\"foo\").isCloseTo(2.0, Assertions.offset(0.0001))")
+         "assertThat(2.0).as(\"foo\").isCloseTo(2.0, offset(0.0001))")
    }
 
    @Test
    fun handleMatcherAssert_hasItems()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", Arrays.asList(\"foo\", \"bar\", \"baz\"), hasItems(\"baz\", \"foo\"))",
-         "Assertions.assertThat(Arrays.asList(\"foo\", \"bar\", \"baz\"))" +
+         "assertThat(Arrays.asList(\"foo\", \"bar\", \"baz\"))" +
             ".as(\"desc\").contains(\"baz\", \"foo\")")
    }
 
@@ -210,7 +210,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_hasItem()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", Arrays.asList(\"foo\", \"bar\", \"baz\"), hasItem(\"baz\"))",
-         "Assertions.assertThat(Arrays.asList(\"foo\", \"bar\", \"baz\"))" +
+         "assertThat(Arrays.asList(\"foo\", \"bar\", \"baz\"))" +
             ".as(\"desc\").contains(\"baz\")")
    }
 
@@ -218,7 +218,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_hasEntry()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", myMap, hasEntry(\"bar\", \"foo\"))",
-         "Assertions.assertThat(myMap)" +
+         "assertThat(myMap)" +
             ".as(\"desc\").containsKey(\"bar\", \"foo\")")
    }
 
@@ -226,7 +226,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_containsString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"myStringOfNote\", containsString(\"ring\"))",
-         "Assertions.assertThat(\"myStringOfNote\")" +
+         "assertThat(\"myStringOfNote\")" +
             ".as(\"desc\").contains(\"ring\")")
    }
 
@@ -234,7 +234,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_is()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, is(Cheddar.class))",
-         "Assertions.assertThat(cheese)" +
+         "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
@@ -242,7 +242,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_isEmptyString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", b, isEmptyString())",
-         "Assertions.assertThat(b)" +
+         "assertThat(b)" +
             ".as(\"desc\").isEmpty()")
    }
 
@@ -250,7 +250,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_notIsEmptyString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", b, not(isEmptyString()))",
-         "Assertions.assertThat(b)" +
+         "assertThat(b)" +
             ".as(\"desc\").isNotEmpty()")
    }
 
@@ -258,7 +258,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_isEmptyOrNullString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", b, isEmptyOrNullString())",
-         "Assertions.assertThat(b)" +
+         "assertThat(b)" +
             ".as(\"desc\").isBlank()")
    }
 
@@ -266,7 +266,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_notIsEmptyOrNullString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", b, not(isEmptyOrNullString()))",
-         "Assertions.assertThat(b)" +
+         "assertThat(b)" +
             ".as(\"desc\").isNotBlank()")
    }
 
@@ -274,7 +274,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_notNullValue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", a, notNullValue())",
-         "Assertions.assertThat(a)" +
+         "assertThat(a)" +
             ".as(\"desc\").isNotNull()")
    }
 
@@ -282,7 +282,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_nullValue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", a, nullValue())",
-         "Assertions.assertThat(a)" +
+         "assertThat(a)" +
             ".as(\"desc\").isNull()")
    }
 
@@ -290,7 +290,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_instanceOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, instanceOf(Cheddar.class))",
-         "Assertions.assertThat(cheese)" +
+         "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
@@ -298,7 +298,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_any()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, any(Cheddar.class))",
-         "Assertions.assertThat(cheese)" +
+         "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
@@ -306,7 +306,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_lessThan()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, lessThan(3))",
-         "Assertions.assertThat(2)" +
+         "assertThat(2)" +
             ".as(\"foo\").isLessThan(3)")
    }
 
@@ -314,7 +314,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_lessThanOrEqualTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, lessThanOrEqualTo(3))",
-         "Assertions.assertThat(2)" +
+         "assertThat(2)" +
             ".as(\"foo\").isLessThanOrEqualTo(3)")
    }
 
@@ -322,7 +322,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_lessThan_Instant()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Instant.now(), lessThan(Instant.now()))",
-         "Assertions.assertThat(Instant.now())" +
+         "assertThat(Instant.now())" +
             ".as(\"foo\").isBefore(Instant.now())")
    }
 
@@ -330,7 +330,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_lessThanOrEqualTo_Instant()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Instant.now(), lessThanOrEqualTo(Instant.now()))",
-         "Assertions.assertThat(Instant.now())" +
+         "assertThat(Instant.now())" +
             ".as(\"foo\").isBeforeOrEqualTo(Instant.now())")
    }
 
@@ -338,7 +338,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_greaterThan()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, greaterThan(3))",
-         "Assertions.assertThat(2)" +
+         "assertThat(2)" +
             ".as(\"foo\").isGreaterThan(3)")
    }
 
@@ -346,7 +346,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_greaterThanOrEqualTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, greaterThanOrEqualTo(3))",
-         "Assertions.assertThat(2)" +
+         "assertThat(2)" +
             ".as(\"foo\").isGreaterThanOrEqualTo(3)")
    }
 
@@ -354,7 +354,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_greaterThan_Instant()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Instant.now(), greaterThan(Instant.now()))",
-         "Assertions.assertThat(Instant.now())" +
+         "assertThat(Instant.now())" +
             ".as(\"foo\").isAfter(Instant.now())")
    }
 
@@ -362,7 +362,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_greaterThanOrEqualTo_Instant()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Instant.now(), greaterThanOrEqualTo(Instant.now()))",
-         "Assertions.assertThat(Instant.now())" +
+         "assertThat(Instant.now())" +
             ".as(\"foo\").isAfterOrEqualTo(Instant.now())")
    }
 
@@ -371,7 +371,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Arrays.asList(\"foo\", \"bar\"), " +
             "contains(\"foo\", \"bar\"))",
-         "Assertions.assertThat(Arrays.asList(\"foo\", \"bar\"))" +
+         "assertThat(Arrays.asList(\"foo\", \"bar\"))" +
             ".as(\"foo\").containsExactly(\"foo\", \"bar\")")
    }
 
@@ -380,7 +380,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Arrays.asList(\"foo\", \"bar\"), " +
             "containsInAnyOrder(\"foo\", \"bar\"))",
-         "Assertions.assertThat(Arrays.asList(\"foo\", \"bar\"))" +
+         "assertThat(Arrays.asList(\"foo\", \"bar\"))" +
             ".as(\"foo\").containsAll(\"foo\", \"bar\")")
    }
 
@@ -388,7 +388,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_sameInstance()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is the same instance\", a, sameInstance(b))",
-         "Assertions.assertThat(a)" +
+         "assertThat(a)" +
             ".as(\"is the same instance\").isSameAs(b)")
    }
 
@@ -396,7 +396,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_theInstance()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is the same instance\", a, theInstance(b))",
-         "Assertions.assertThat(a)" +
+         "assertThat(a)" +
             ".as(\"is the same instance\").isSameAs(b)")
    }
 
@@ -404,56 +404,56 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_startsWith()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"fOObar\", startsWith(\"fOO\"))",
-         "Assertions.assertThat(\"fOObar\").as(\"desc\").startsWith(\"fOO\")")
+         "assertThat(\"fOObar\").as(\"desc\").startsWith(\"fOO\")")
    }
 
    @Test
    fun handleMatcherAssert_endsWith()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"fOObar\", endsWith(\"bar\"))",
-         "Assertions.assertThat(\"fOObar\").as(\"desc\").endsWith(\"bar\")")
+         "assertThat(\"fOObar\").as(\"desc\").endsWith(\"bar\")")
    }
 
    @Test
    fun handleMatcherAssert_allOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"foobar\", allOf(startsWith(\"foo\"), containsString(\"or\")))",
-         "Assertions.assertThat(\"foobar\").as(\"desc\").startsWith(\"foo\").contains(\"or\")")
+         "assertThat(\"foobar\").as(\"desc\").startsWith(\"foo\").contains(\"or\")")
    }
 
    @Test
    fun arrayContainingInAnyOrder()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{\"foo\", \"bar\"}, arrayContaining(\"foo\", \"bar\"))",
-         "Assertions.assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").containsExactly(\"foo\", \"bar\")")
+         "assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").containsExactly(\"foo\", \"bar\")")
    }
 
    @Test
    fun handleMatcherAssert_arrayContaining()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{\"foo\", \"bar\"}, arrayContainingInAnyOrder(\"foo\", \"bar\"))",
-         "Assertions.assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").contains(\"foo\", \"bar\")")
+         "assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").contains(\"foo\", \"bar\")")
    }
 
    @Test
    fun handleMatcherAssert_arrayWithSize()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{\"foo\", \"bar\"}, arrayWithSize(2))",
-         "Assertions.assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").hasSize(2)")
+         "assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").hasSize(2)")
    }
 
    @Test
    fun handleMatcherAssert_emptyArray()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{}, emptyArray())",
-         "Assertions.assertThat(new String[]{}).as(\"desc\").isEmpty()")
+         "assertThat(new String[]{}).as(\"desc\").isEmpty()")
    }
 
    @Test
    fun handleMatcherAssert_emptyIterable()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{}, emptyIterable())",
-         "Assertions.assertThat(new String[]{}).as(\"desc\").isEmpty()")
+         "assertThat(new String[]{}).as(\"desc\").isEmpty()")
    }
 
    private fun assertCanHandle(import: String,
@@ -509,9 +509,9 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
 
       ReadAction.run<IllegalStateException> {
          if (psiMethodCallExpression == null)
-            Assertions.fail("Missing method call")
+            fail("Missing method call")
          else
-            Assertions.assertThat(HamcrestHandler().canHandle(psiMethodCallExpression)).isEqualTo(canHandle)
+            assertThat(HamcrestHandler().canHandle(psiMethodCallExpression)).isEqualTo(canHandle)
       }
    }
 
