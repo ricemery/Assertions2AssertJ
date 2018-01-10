@@ -79,6 +79,13 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun canHandleAssert_is_empty()  {
+      assertCanHandle(listOf("org.junit.Assert.assertThat",
+         "org.hamcrest.Matchers.*"),
+         "assertThat(new List(), is(empty())")
+   }
+
+   @Test
    fun canHandleAssert_is_emptyArray()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.CoreMatchers.*"),
@@ -104,6 +111,20 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.CoreMatchers.*"),
          "assertThat(new List(), not(emptyIterable()))")
+   }
+
+   @Test
+   fun cantHandleAssert_allOf()  {
+      assertCanHandle(listOf("org.junit.Assert.assertThat",
+         "org.hamcrest.Matchers.*"),
+         "assertThat(new List(), allOf(is(nullValue()), is(nullValue())")
+   }
+
+   @Test
+   fun cantHandleAssert_bothOf()  {
+      assertCanHandle(listOf("org.junit.Assert.assertThat",
+         "org.hamcrest.Matchers.*"),
+         "assertThat(new List(), allOf(is(nullValue()), is(nullValue()))")
    }
 
    @Disabled // Something screwy with classpath
@@ -219,7 +240,31 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", myMap, hasEntry(\"bar\", \"foo\"))",
          "assertThat(myMap)" +
-            ".as(\"desc\").containsKey(\"bar\", \"foo\")")
+            ".as(\"desc\").containsEntry(\"bar\", \"foo\")")
+   }
+
+   @Test
+   fun handleMatcherAssert_hasKey()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", myMap, hasKey(\"bar\"))",
+         "assertThat(myMap)" +
+            ".as(\"desc\").containsKey(\"bar\")")
+   }
+
+   @Test
+   fun handleMatcherAssert_hasValue()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", myMap, hasValue(\"bar\"))",
+         "assertThat(myMap)" +
+            ".as(\"desc\").containsValue(\"bar\")")
+   }
+
+   @Test
+   fun handleMatcherAssert_hasToString()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", a, hasToString())",
+         "assertThat(a)" +
+            ".as(\"desc\").hasToString()")
    }
 
    @Test
@@ -290,6 +335,14 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    fun handleMatcherAssert_instanceOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, instanceOf(Cheddar.class))",
+         "assertThat(cheese)" +
+            ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
+   }
+
+   @Test
+   fun handleMatcherAssert_typeCompatibleWith()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"is a cheese instance\", cheese, typeCompatibleWith(Cheddar.class))",
          "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
@@ -422,6 +475,13 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun handleMatcherAssert_both()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", \"foobar\", both(startsWith(\"foo\"), containsString(\"or\")))",
+         "assertThat(\"foobar\").as(\"desc\").startsWith(\"foo\").contains(\"or\")")
+   }
+
+   @Test
    fun arrayContainingInAnyOrder()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{\"foo\", \"bar\"}, arrayContaining(\"foo\", \"bar\"))",
@@ -443,6 +503,41 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun handleMatcherAssert_hasSize()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", a, hasSize(2))",
+         "assertThat(a).as(\"desc\").hasSize(2)")
+   }
+
+   @Test
+   fun handleMatcherAssert_iterableWithSize()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", a, iterableWithSize(2))",
+         "assertThat(a).as(\"desc\").hasSize(2)")
+   }
+
+   @Test
+   fun handleMatcherAssert_empty()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", new List(), empty())",
+         "assertThat(new List()).as(\"desc\").isEmpty()")
+   }
+
+   @Test
+   fun handleMatcherAssert_is_empty()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", new List(), is(empty()))",
+         "assertThat(new List()).as(\"desc\").isEmpty()")
+   }
+
+   @Test
+   fun handleMatcherAssert_not_empty()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", new List(), not(empty()))",
+         "assertThat(new List()).as(\"desc\").isNotEmpty()")
+   }
+
+   @Test
    fun handleMatcherAssert_emptyArray()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{}, emptyArray())",
@@ -454,6 +549,27 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{}, emptyIterable())",
          "assertThat(new String[]{}).as(\"desc\").isEmpty()")
+   }
+
+   @Test
+   fun handleMatcherAssert_emptyCollectionOf()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", new List(), emptyCollectionOf())",
+         "assertThat(new List()).as(\"desc\").isEmpty()")
+   }
+
+   @Test
+   fun handleMatcherAssert_is_emptyCollectionOf()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", new List(), is(emptyCollectionOf()))",
+         "assertThat(new List()).as(\"desc\").isEmpty()")
+   }
+
+   @Test
+   fun handleMatcherAssert_describedAs()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(a, describedAs(\"some desc params - %0 %1\", equalTo(a), \"param1\", \"param2\"))",
+         "assertThat(a).as(\"some desc params - %0 %1\", \"param1\", \"param2\").isEqualTo(a)")
    }
 
    private fun assertCanHandle(import: String,

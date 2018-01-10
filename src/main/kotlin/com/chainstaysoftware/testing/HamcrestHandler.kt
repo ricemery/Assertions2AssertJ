@@ -21,13 +21,20 @@ class HamcrestHandler : AssertHandler {
    // ignored.
    private val okRecursive = hashSetOf("is(equalTo",
       "not(equalTo",
+      "is(empty())",
+      "not(empty())",
+      "is(emptyCollectionOf(",
+      "not(emptyCollectionOf(",
       "is(emptyArray())",
       "not(emptyArray())",
       "is(emptyIterable())",
       "not(emptyIterable())",
       "not(instanceOf(",
       "not(isEmptyString())",
-      "not(isEmptyOrNullString())")
+      "not(isEmptyOrNullString())",
+      "allOf(",
+      "both(",
+      "describedAs(")
 
    override fun canHandle(psiElement: PsiElement): Boolean =
       (isQualifiedClass(psiElement, "org.hamcrest.MatcherAssert") ||
@@ -129,7 +136,10 @@ class HamcrestHandler : AssertHandler {
          methodName == "closeTo" -> refactorAssertCloseTo(methodParams)
          methodName == "hasItems" -> refactor("contains", methodParams)
          methodName == "hasItem" -> refactor("contains", methodParams)
-         methodName == "hasEntry" -> refactor("containsKey", methodParams)
+         methodName == "hasEntry" -> refactor("containsEntry", methodParams)
+         methodName == "hasKey" -> refactor("containsKey", methodParams)
+         methodName == "hasValue" -> refactor("containsValue", methodParams)
+         methodName == "hasToString" -> refactor("hasToString", methodParams)
          methodName == "containsString" -> refactor("contains", methodParams)
          methodName == "is" -> refactorAssertIs(methodParams)
          methodName == "isEmptyString" -> refactor("isEmpty", methodParams)
@@ -137,7 +147,7 @@ class HamcrestHandler : AssertHandler {
          methodName == "notNullValue" -> "isNotNull()"
          methodName == "nullValue" -> "isNull()"
          methodName == "not" -> refactorNot(methodParams)
-         methodName == "instanceOf" -> refactor("isInstanceOf", methodParams)
+         methodName == "instanceOf" || methodName == "typeCompatibleWith" -> refactor("isInstanceOf", methodParams)
          methodName == "any" -> refactor("isInstanceOf", methodParams)
          methodName == "lessThan" -> refactorAssertLessThan(methodParams)
          methodName == "lessThanOrEqualTo" -> refactorAssertLessThan(methodParams, true)
@@ -148,12 +158,16 @@ class HamcrestHandler : AssertHandler {
          methodName == "sameInstance" || methodName == "theInstance"-> refactor("isSameAs", methodParams)
          methodName == "startsWith" -> refactor("startsWith", methodParams)
          methodName == "endsWith" -> refactor("endsWith", methodParams)
-         methodName == "allOf" || methodName == "array" -> refactorAllOf(methodParams)
+         methodName == "allOf" || methodName == "array" || methodName == "both" -> refactorAllOf(methodParams)
          methodName == "arrayContaining" -> refactorArrayContaining(methodParams)
          methodName == "arrayContainingInAnyOrder" -> refactorArrayContainingInAnyOrder(methodParams)
          methodName == "arrayWithSize" -> refactorArrayWithSize(methodParams)
+         methodName == "hasSize" || methodName == "iterableWithSize" -> refactorHasSize(methodParams)
+         methodName == "empty" -> "isEmpty()"
          methodName == "emptyArray" -> "isEmpty()"
          methodName == "emptyIterable" -> "isEmpty()"
+         methodName == "emptyCollectionOf" -> "isEmpty()"
+         methodName == "describedAs" -> refactorDescribedAs(methodParams)
          else -> s
       }
    }
@@ -232,6 +246,18 @@ class HamcrestHandler : AssertHandler {
          else -> "hasSize(${expressions
             .joinToString(".") { expression -> refactorAssertCall(expression) }})"
       }
+
+   private fun refactorHasSize(expressions: Array<PsiExpression>): String =
+      when (expressions[0]) {
+         is PsiReferenceExpression, is PsiLiteralExpression -> "hasSize(${expressions[0].text})"
+         else -> "hasSize(${expressions
+            .joinToString(".") { expression -> refactorAssertCall(expression) }})"
+      }
+
+   private fun refactorDescribedAs(expressions: Array<PsiExpression>): String {
+      val args = expressions.copyOfRange(2, expressions.size).joinToString(", ") { arg -> arg.text }
+      return "as(${expressions[0].text}, $args)." + refactorAssertCall(expressions[1])
+   }
 
    private fun getStaticImports(newExpression: PsiStatement): Set<Pair<String, String>> {
       return if (newExpression.text.contains("offset(")) {

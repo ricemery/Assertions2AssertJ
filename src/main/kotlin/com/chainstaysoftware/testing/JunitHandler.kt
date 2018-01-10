@@ -17,6 +17,8 @@ class JunitHandler : AssertHandler {
       "assertSame" to { expression -> refactorAssertEquals(expression) },
       "assertNotSame" to { expression -> refactorAssertNotEquals(expression) },
       "assertArrayEquals" to { expression -> refactorAssertArrayEquals(expression) },
+      "assertIterableEquals" to { expression -> refactorAssertIterableEquals(expression) },
+      "assertLinesMatch" to { expression -> refactorAssertIterableEquals(expression) },
       "assertTrue" to { expression -> refactorAssertTrue(expression) },
       "assertFalse" to { expression -> refactorAssertFalse(expression) },
       "assertNull" to { expression -> refactorAssertNull(expression) },
@@ -130,6 +132,22 @@ class JunitHandler : AssertHandler {
                val delta = expressions[2].text
                assertStr(actual, "contains(${expected.trim()}, offset(${delta.trim()}))")
             }
+         }
+         else -> {
+            val expected = expressions[0].text
+            val actual = expressions[1].text
+            assertStr(actual, "isEqualTo($expected)")
+         }
+      }
+   }
+
+   private fun refactorAssertIterableEquals(expressions: Array<PsiExpression>): String {
+      return when {
+         expressions.size == 3 -> {
+            val expected = expressions[0].text
+            val actual = expressions[1].text
+            val desc = expressions[2].text
+            assertStr(actual, "isEqualTo(" + expected.trim() + ")", desc)
          }
          else -> {
             val expected = expressions[0].text

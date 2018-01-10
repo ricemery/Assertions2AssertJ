@@ -141,6 +141,27 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun handleAssertIterableEquals()  {
+      assertHandle("org.junit.Assert.assertIterableEquals",
+         "assertIterableEquals(new List(), new List())",
+         "assertThat(new List()).isEqualTo(new List())")
+   }
+
+   @Test
+   fun handleAssertIterableEquals_withDesc()  {
+      assertHandle("org.junit.Assert.assertIterableEquals",
+         "assertIterableEquals(new List(), new List(), \"desc\")",
+         "assertThat(new List()).as(\"desc\").isEqualTo(new List())")
+   }
+
+   @Test
+   fun handleAssertLinesMatch()  {
+      assertHandle("org.junit.Assert.assertIterableEquals",
+         "assertLinesMatch(new List(), new List())",
+         "assertThat(new List()).isEqualTo(new List())")
+   }
+
+   @Test
    fun handleAssertTrue()  {
       assertHandle("org.junit.Assert.assertTrue",
          "assertTrue(a)",
