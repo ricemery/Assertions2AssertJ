@@ -56,7 +56,7 @@ object TestUtil {
          if (updated == null)
             Assertions.fail("Missing method call")
          else
-            Assertions.assertThat(updated.text).isEqualTo(expected)
+            Assertions.assertThat(updated.text).isEqualToIgnoringWhitespace(expected)
       }
    }
 }

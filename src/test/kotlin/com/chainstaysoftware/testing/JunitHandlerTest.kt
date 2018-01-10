@@ -63,24 +63,205 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
          "assertThat(2).isEqualTo(2)")
    }
 
+   @Test
+   fun handleAssertEquals_withDesc()  {
+      assertHandle("org.junit.Assert.assertEquals",
+         "assertEquals(2, 2, \"desc\")",
+         "assertThat(2).as(\"desc\").isEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertEquals_withDelta()  {
+      assertHandle("org.junit.Assert.assertEquals",
+         "assertEquals(2.0, 2.0, 1.0)",
+         "assertThat(2.0).isCloseTo(2.0, offset(1.0))")
+   }
+
+   @Test
+   fun handleAssertEquals_withDeltaAndDesc()  {
+      assertHandle("org.junit.Assert.assertEquals",
+         "assertEquals(1.0, 1.0, 0.1, \"desc\")",
+         "assertThat(1.0).as(\"desc\").isCloseTo(1.0, offset(0.1))")
+   }
+
+   @Test
+   fun handleAssertNotEquals()  {
+      assertHandle("org.junit.Assert.assertNotEquals",
+         "assertNotEquals(2, 2)",
+         "assertThat(2).isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertNotEquals_withDesc()  {
+      assertHandle("org.junit.Assert.assertNotEquals",
+         "assertNotEquals(2, 2, \"desc\")",
+         "assertThat(2).as(\"desc\").isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertSame()  {
+      assertHandle("org.junit.Assert.assertSame",
+         "assertSame(2, 2)",
+         "assertThat(2).isEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertNotSame()  {
+      assertHandle("org.junit.Assert.assertNotSame",
+         "assertNotSame(2, 2)",
+         "assertThat(2).isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssertArrayEquals()  {
+      assertHandle("org.junit.Assert.assertArrayEquals",
+         "assertArrayEquals(new int[]{}, new int[]{})",
+         "assertThat(new int[]{}).isEqualTo(new int[]{})")
+   }
+
+   @Test
+   fun handleAssertArrayEquals_withDesc()  {
+      assertHandle("org.junit.Assert.assertArrayEquals",
+         "assertArrayEquals(new int[]{}, new int[]{}, \"desc\")",
+         "assertThat(new int[]{}).as(\"desc\").isEqualTo(new int[]{})")
+   }
+
+   @Test
+   fun handleAssertArrayEquals_withDelta()  {
+      assertHandle("org.junit.Assert.assertArrayEquals",
+         "assertArrayEquals(new int[]{}, new int[]{}, 1.0)",
+         "assertThat(new int[]{}).contains(new int[]{}, offset(1.0))")
+   }
+
+   @Test
+   fun handleAssertArrayEquals_withDeltaAndDesc()  {
+      assertHandle("org.junit.Assert.assertArrayEquals",
+         "assertArrayEquals(new int[]{}, new int[]{}, 1.0, \"desc\")",
+         "assertThat(new int[]{}).as(\"desc\").contains(new int[]{}, offset(1.0))")
+   }
+
+   @Test
+   fun handleAssertTrue()  {
+      assertHandle("org.junit.Assert.assertTrue",
+         "assertTrue(a)",
+         "assertThat(a).isTrue()")
+   }
+
+   @Test
+   fun handleAssertTrue_withDesc()  {
+      assertHandle("org.junit.Assert.assertTrue",
+         "assertTrue(a, \"desc\")",
+         "assertThat(a).as(\"desc\").isTrue()")
+   }
+
+   @Test
+   fun handleAssertFalse()  {
+      assertHandle("org.junit.Assert.assertFalse",
+         "assertFalse(a)",
+         "assertThat(a).isFalse()")
+   }
+
+   @Test
+   fun handleAssertFalse_withDesc()  {
+      assertHandle("org.junit.Assert.assertFalse",
+         "assertFalse(a, \"desc\")",
+         "assertThat(a).as(\"desc\").isFalse()")
+   }
+
+   @Test
+   fun handleAssertNull()  {
+      assertHandle("org.junit.Assert.assertNull",
+         "assertNull(a)",
+         "assertThat(a).isNull()")
+   }
+
+   @Test
+   fun handleAssertNull_withDesc()  {
+      assertHandle("org.junit.Assert.assertNull",
+         "assertNull(a, \"desc\")",
+         "assertThat(a).as(\"desc\").isNull()")
+   }
+
+   @Test
+   fun handleAssertNotNull()  {
+      assertHandle("org.junit.Assert.assertNotNull",
+         "assertNotNull(a)",
+         "assertThat(a).isNotNull()")
+   }
+
+   @Test
+   fun handleAssertNotNull_withDesc()  {
+      assertHandle("org.junit.Assert.assertNotNull",
+         "assertNotNull(a, \"desc\")",
+         "assertThat(a).as(\"desc\").isNotNull()")
+   }
+
+   @Test
+   fun handleAssertThrows()  {
+      assertHandle("org.junit.Assert.assertThrows",
+         "assertThrows(IllegalStateExcption.class, () -> {throw new IllegalStateException()})",
+         "assertThatExceptionOfType(IllegalStateExcption.class).isThrownBy(() -> {throw new IllegalStateException()})")
+   }
+
+   @Test
+   fun handleAssertThrows_withDesc()  {
+      assertHandle("org.junit.Assert.assertThrows",
+         "assertThrows(IllegalStateExcption.class, () -> {throw new IllegalStateException()}, \"desc\")",
+         "assertThatExceptionOfType(IllegalStateExcption.class).as(\"desc\").isThrownBy(() -> {throw new IllegalStateException()})")
+   }
+
+   @Test
+   fun handleAssertFail()  {
+      assertHandle("org.junit.Assert.fail",
+         "fail(\"desc\")",
+         "fail(\"desc\")")
+   }
+
+   @Test
+   fun handleAssertFail_withThrowable()  {
+      assertHandle("org.junit.Assert.fail",
+         "fail(new IllegalStateException())",
+         "fail(new IllegalStateException())")
+   }
+
+   @Test
+   fun handleAssertFail_withDesc()  {
+      assertHandle("org.junit.Assert.fail",
+         "fail(e, \"desc\")",
+         "fail(\"desc\", e)")
+   }
+
    private fun assertCanHandle(import: String,
+                               methodCall: String) =
+      assertCanHandle(listOf(import), methodCall)
+
+   private fun assertCanHandle(imports: List<String>,
                                methodCall: String) {
-      val java = getJavaText(import, methodCall)
+      val java = getJavaText(imports, methodCall)
       val myFile = myFixture.addFileToProject(myModule.name + "/p/" + "foo.java",
          java)
       assertCanHandle(myFile)
    }
 
    private fun assertCantHandle(import: String,
-                               methodCall: String) {
-      val java = getJavaText(import, methodCall)
+                                methodCall: String) =
+      assertCantHandle(listOf(import), methodCall)
+
+   private fun assertCantHandle(imports: List<String>,
+                                methodCall: String) {
+      val java = getJavaText(imports, methodCall)
       val myFile = myFixture.addFileToProject(myModule.name + "/p/" + "foo.java",
          java)
       assertCantHandle(myFile)
    }
 
    private fun getJavaText(import: String, methodCall: String): String {
-      return "import static $import;\n" +
+      return getJavaText(listOf(import), methodCall)
+   }
+
+   private fun getJavaText(imports: List<String>, methodCall: String): String {
+      return imports.joinToString("\n") {import -> "import static $import;"} +
+         "\n\n" +
          "class foo {\n" +
          "    @Test\n" +
          "    void foo() {\n" +

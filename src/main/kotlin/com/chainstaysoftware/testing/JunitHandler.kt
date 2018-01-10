@@ -21,7 +21,8 @@ class JunitHandler : AssertHandler {
       "assertFalse" to { expression -> refactorAssertFalse(expression) },
       "assertNull" to { expression -> refactorAssertNull(expression) },
       "assertNotNull" to { expression -> refactorAssertNotNull(expression) },
-      "assertThrows" to { expression -> refactorAssertThrows(expression) })
+      "assertThrows" to { expression -> refactorAssertThrows(expression) },
+      "fail" to { expression -> refactorFail(expression) })
 
    override fun canHandle(psiElement: PsiElement): Boolean =
       isQualifiedClass(psiElement, "org.junit.jupiter.api.Assertions") ||
@@ -78,7 +79,7 @@ class JunitHandler : AssertHandler {
          expressions.size == 3 -> {
             val expected = expressions[0].text
             val actual = expressions[1].text
-            if ("PsiType:String" == expressions[0].type.toString()) {
+            if ("PsiType:String" == expressions[2].type.toString()) {
                val desc = expressions[2].text
                assertStr(actual, "isEqualTo(" + expected.trim() + ")", desc)
             } else {
@@ -122,7 +123,7 @@ class JunitHandler : AssertHandler {
          expressions.size == 3 -> {
             val expected = expressions[0].text
             val actual = expressions[1].text
-            if ("PsiType:String" == expressions[0].type.toString()) {
+            if ("PsiType:String" == expressions[2].type.toString()) {
                val desc = expressions[2].text
                assertStr(actual, "isEqualTo(" + expected.trim() + ")", desc)
             } else {
@@ -207,6 +208,17 @@ class JunitHandler : AssertHandler {
             val actual = expressions[1].text
             "assertThatExceptionOfType(${expected.trim()}).isThrownBy(${actual.trim()})"
          }
+      }
+   }
+
+   private fun refactorFail(expressions: Array<PsiExpression>): String {
+      return when {
+         expressions.size == 2 -> {
+            val cause = expressions[0].text
+            val desc = expressions[1].text
+            "fail($desc, ${cause.trim()})"
+         }
+         else -> "fail(${expressions[0].text.trim()})"
       }
    }
 
