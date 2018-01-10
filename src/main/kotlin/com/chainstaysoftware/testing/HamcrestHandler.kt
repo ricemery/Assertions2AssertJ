@@ -10,26 +10,76 @@ import com.intellij.psi.PsiLiteralExpression
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiReferenceExpression
 import com.intellij.psi.impl.source.PsiImmediateClassType
+import com.intellij.psi.util.PsiTreeUtil
 
 /**
  * Handler to convert Hamcrest Assertions and Junit 4 assertThat Assertions to AssertJ Assertions.
  */
 class HamcrestHandler : AssertHandler {
+   // HashSet of 'recursive' matcher calls that will be supported. All others will be
+   // ignored.
+   private val okRecursive = hashSetOf("is(equalTo",
+      "not(equalTo",
+      "is(emptyArray())",
+      "not(emptyArray())",
+      "is(emptyIterable())",
+      "not(emptyIterable())",
+      "not(instanceOf(",
+      "not(isEmptyString())",
+      "not(isEmptyOrNullString())")
+
    override fun canHandle(psiElement: PsiElement): Boolean =
-      isQualifiedClass(psiElement, "org.hamcrest.MatcherAssert") ||
+      (isQualifiedClass(psiElement, "org.hamcrest.MatcherAssert") ||
          (isQualifiedClass(psiElement, "org.junit.Assert") &&
-            "assertThat" == Util.getMethodName(psiElement))
+            "assertThat" == Util.getMethodName(psiElement)))
+      && !shouldIgnore(psiElement)
+
+   /**
+    * True if the passed in PsiElement should be ignored. Most Assert statements
+    * that contain Matchers within Matchers will be ignored. Example - anyOf(...)
+    */
+   private fun shouldIgnore(psiElement: PsiElement): Boolean {
+      if (!hasRecursiveMatchers(psiElement)) {
+         return false
+      }
+
+      val expressions = psiElement.children
+         .filter { child -> child is PsiExpressionList }
+         .map { child -> (child as PsiExpressionList).expressions }
+         .first()
+      val matcher = expressions[expressions.size - 1]
+      return okRecursive.find { prefix -> matcher.text.startsWith(prefix) } == null
+   }
+
+   /**
+    * Determines if the passed in PsiElement contains a tree of Matchers.
+    */
+   private fun hasRecursiveMatchers(psiElement: PsiElement) =
+      psiElement.children
+         .filter { child -> child is PsiExpressionList }
+         .map { child -> (child as PsiExpressionList).expressions }
+         .map { expressions -> hasChildMatcher(expressions[expressions.size - 1]) }
+         .contains(true)
+
+   /**
+    * Determines if a PsiElement has a child that is a CoreMatchers or Matchers instance.
+    */
+   private fun hasChildMatcher(psiElement: PsiElement): Boolean =
+      PsiTreeUtil.findChildrenOfType(psiElement, PsiMethodCallExpression::class.java)
+         .any { elem -> isQualifiedClass(elem, "org.hamcrest.CoreMatchers")
+            || isQualifiedClass(elem, "org.hamcrest.Matchers")}
 
    override fun handle(project: Project, psiElement: PsiElement) {
-      psiElement.children.forEach { child ->
-         refactorHamcrest(project, psiElement, child)
-      }
+      psiElement.children
+         .filter { child -> child is PsiExpressionList }
+         .forEach { child ->
+            refactorHamcrest(project, psiElement, child as PsiExpressionList)
+         }
    }
 
    private fun refactorHamcrest(project: Project,
                                 matcherAssertElement: PsiElement,
-                                childElement: PsiElement?) {
-      if (childElement is PsiExpressionList) {
+                                childElement: PsiExpressionList) {
          val expressions = childElement.expressions
          val newExpressionStr = when {
             expressions.size == 3 -> "Assertions.assertThat(${expressions[1].text.trim()})" +
@@ -46,7 +96,6 @@ class HamcrestHandler : AssertHandler {
                .createStatementFromText(newExpressionStr, null)
             matcherAssertElement.replace(newExpression)
          }
-      }
    }
 
    private fun refactorAssertCall(psiExpression: PsiExpression): String {
@@ -62,6 +111,8 @@ class HamcrestHandler : AssertHandler {
          s == "equalTo(true)" || s == "is(true)" || s == "not(false)" -> "isTrue()"
          s == "equalTo(false)" || s == "is(false)" || s == "not(true)" -> "isFalse()"
          s == "not(emptyArray())" || s == "not(emptyIterable())" -> "isNotEmpty()"
+         s == "not(isEmptyString())" -> "isNotEmpty()"
+         s == "not(isEmptyOrNullString())" -> "isNotBlank()"
          methodName == "equalTo" -> refactor("isEqualTo", methodParams)
          methodName == "equalToIgnoringCase" -> refactor("isEqualToIgnoringCase", methodParams)
          methodName == "equalToIgnoringWhiteSpace" -> refactor("isEqualToIgnoringWhitespace", methodParams)
@@ -71,6 +122,8 @@ class HamcrestHandler : AssertHandler {
          methodName == "hasEntry" -> refactor("containsKey", methodParams)
          methodName == "containsString" -> refactor("contains", methodParams)
          methodName == "is" -> refactorAssertIs(methodParams)
+         methodName == "isEmptyString" -> refactor("isEmpty", methodParams)
+         methodName == "isEmptyOrNullString" -> refactor("isBlank", methodParams)
          methodName == "notNullValue" -> "isNotNull()"
          methodName == "nullValue" -> "isNull()"
          methodName == "not" -> refactorNot(methodParams)
@@ -104,7 +157,6 @@ class HamcrestHandler : AssertHandler {
       return "isCloseTo(${expected.trim()}, Assertions.offset(${delta.trim()}))"
    }
 
-   // TODO: Better handling for is.
    private fun refactorAssertIs(expressions: Array<PsiExpression>): String =
       when {
          expressions[0] is PsiClassObjectAccessExpression -> "isInstanceOf(${expressions[0].text})"
@@ -118,7 +170,6 @@ class HamcrestHandler : AssertHandler {
          }
       }
 
-   // TODO: Better handling for Not
    private fun refactorNot(expressions: Array<PsiExpression>): String =
       refactorAssertCall(expressions[0]).replaceFirst("is", "isNot")
 
@@ -149,7 +200,6 @@ class HamcrestHandler : AssertHandler {
    private fun refactorAllOf(expressions: Array<PsiExpression>) =
       expressions.joinToString(".") { expression -> refactorAssertCall(expression) }
 
-   // TODO - better support for collection of matchers - current support is not correct
    private fun refactorArrayContaining(expressions: Array<PsiExpression>): String =
       when (expressions[0]) {
          is PsiReferenceExpression, is PsiLiteralExpression -> "containsExactly(${expressions
@@ -158,7 +208,6 @@ class HamcrestHandler : AssertHandler {
             .joinToString(".") { expression -> refactorAssertCall(expression) }})"
       }
 
-   // TODO - better support for collection of matchers - current support is not correct
    private fun refactorArrayContainingInAnyOrder(expressions: Array<PsiExpression>): String =
       when (expressions[0]) {
          is PsiReferenceExpression, is PsiLiteralExpression -> "contains(${expressions
@@ -167,7 +216,6 @@ class HamcrestHandler : AssertHandler {
             .joinToString(".") { expression -> refactorAssertCall(expression) }})"
       }
 
-   // TODO - better support for collection of matchers - current support is not correct
    private fun refactorArrayWithSize(expressions: Array<PsiExpression>): String =
       when (expressions[0]) {
          is PsiReferenceExpression, is PsiLiteralExpression -> "hasSize(${expressions[0].text})"

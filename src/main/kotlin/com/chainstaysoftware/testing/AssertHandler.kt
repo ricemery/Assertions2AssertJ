@@ -13,7 +13,6 @@ interface AssertHandler {
     */
    fun canHandle(psiElement: PsiElement): Boolean
 
-
    /**
     * Converts the {@link PsiElement}. Will only be called if canHandle return true.
     */

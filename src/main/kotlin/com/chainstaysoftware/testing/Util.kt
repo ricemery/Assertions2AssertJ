@@ -98,8 +98,8 @@ object Util {
     * True if PsiElement is a PsiImportStatement or PsiImportStaticStatement and
     * the PsiElement's qualified name == the passed in qualifiedName.
     */
-   private fun qualifiedNamesEqual(psiElement: PsiElement,
-                                   qualifiedName: String) =
+   fun qualifiedNamesEqual(psiElement: PsiElement,
+                           qualifiedName: String) =
       (psiElement is PsiImportStatement && psiElement.qualifiedName == qualifiedName)
          || (psiElement is PsiImportStaticStatement && psiElement.importReference?.qualifiedName == qualifiedName)
 
@@ -107,8 +107,8 @@ object Util {
     * True if PsiElement is a PsiImportStatement or PsiImportStaticStatement and
     * the PsiElement's qualified name starts with the passed in qualifiedName.
     */
-   private fun qualifiedNameStartsWith(psiElement: PsiElement,
-                                       qualifiedName: String) =
+   fun qualifiedNameStartsWith(psiElement: PsiElement,
+                               qualifiedName: String) =
       (psiElement is PsiImportStatement && psiElement.qualifiedName.toString().startsWith(qualifiedName))
          || (psiElement is PsiImportStaticStatement && psiElement.importReference?.qualifiedName.toString().startsWith(qualifiedName))
 

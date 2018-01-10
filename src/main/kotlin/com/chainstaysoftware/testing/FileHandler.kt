@@ -21,14 +21,14 @@ class FileHandler {
          .forEach {
             it.allMethods.forEach { psiMethod ->
                psiMethod.accept(object : PsiRecursiveElementVisitor() {
-                  override fun visitElement(psiElement2: PsiElement) {
-                     val handler = handlers.firstOrNull { handler -> handler.canHandle(psiElement2) }
+                  override fun visitElement(psiElement: PsiElement) {
+                     val handler = handlers.firstOrNull { handler -> handler.canHandle(psiElement) }
                      when {
                         handler != null -> {
-                           handler.handle(psiFile.project, psiElement2)
+                           handler.handle(psiFile.project, psiElement)
                            codeModified = true
                         }
-                        else -> super.visitElement(psiElement2)
+                        else -> super.visitElement(psiElement)
                      }
                   }
                })
