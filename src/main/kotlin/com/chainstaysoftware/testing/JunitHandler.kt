@@ -23,7 +23,7 @@ class JunitHandler : AssertHandler {
       "assertFalse" to { junit4, expressions -> refactorAssertFalse(junit4, expressions) },
       "assertNull" to { junit4, expressions -> refactorAssertNull(junit4, expressions) },
       "assertNotNull" to { junit4, expressions -> refactorAssertNotNull(junit4, expressions) },
-      "assertThrows" to { junit4, expressions -> refactorAssertThrows(expressions) },
+      "assertThrows" to { _, expressions -> refactorAssertThrows(expressions) },
       "fail" to { _, expressions -> refactorFail(expressions) })
 
    override fun canHandle(psiElement: PsiElement): Boolean =
