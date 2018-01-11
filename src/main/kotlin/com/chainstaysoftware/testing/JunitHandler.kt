@@ -303,7 +303,8 @@ class JunitHandler : AssertHandler {
             val desc = expressions[1].text
             "fail($desc, ${cause.trim()})"
          }
-         else -> "fail(${expressions[0].text.trim()})"
+         expressions.size == 1 -> "fail(${expressions[0].text.trim()})"
+         else -> "fail()"
       }
    }
 

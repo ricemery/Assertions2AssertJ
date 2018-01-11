@@ -381,6 +381,13 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
    @Test
    fun handleAssertFail()  {
       assertHandle("org.junit.Assert.fail",
+         "fail()",
+         "fail()")
+   }
+
+   @Test
+   fun handleAssertFail_withDesc()  {
+      assertHandle("org.junit.Assert.fail",
          "fail(\"desc\")",
          "fail(\"desc\")")
    }
@@ -393,7 +400,7 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
-   fun handleAssertFail_withDesc()  {
+   fun handleAssertFail_withThrowableAndDesc()  {
       assertHandle("org.junit.Assert.fail",
          "fail(e, \"desc\")",
          "fail(\"desc\", e)")
