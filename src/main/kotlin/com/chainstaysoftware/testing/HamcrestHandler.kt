@@ -1,5 +1,6 @@
 package com.chainstaysoftware.testing
 
+import com.chainstaysoftware.testing.Util.isQualifiedClass
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiClassObjectAccessExpression
@@ -9,7 +10,6 @@ import com.intellij.psi.PsiExpressionList
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.psi.PsiMethodCallExpression
 import com.intellij.psi.PsiReferenceExpression
-import com.intellij.psi.PsiStatement
 import com.intellij.psi.impl.source.PsiImmediateClassType
 import com.intellij.psi.util.PsiTreeUtil
 
@@ -19,15 +19,11 @@ import com.intellij.psi.util.PsiTreeUtil
 class HamcrestHandler : AssertHandler {
    // HashSet of 'recursive' matcher calls that will be supported. All others will be
    // ignored.
-   private val okRecursive = hashSetOf("is(equalTo",
+   private val okRecursive = hashSetOf("is(",
       "not(equalTo",
-      "is(empty())",
       "not(empty())",
-      "is(emptyCollectionOf(",
       "not(emptyCollectionOf(",
-      "is(emptyArray())",
       "not(emptyArray())",
-      "is(emptyIterable())",
       "not(emptyIterable())",
       "not(instanceOf(",
       "not(isEmptyString())",
@@ -154,7 +150,7 @@ class HamcrestHandler : AssertHandler {
          methodName == "greaterThan" -> refactorAssertGreaterThan(methodParams)
          methodName == "greaterThanOrEqualTo" -> refactorAssertGreaterThan(methodParams, true)
          methodName == "contains" -> refactor("containsExactly", methodParams)
-         methodName == "containsInAnyOrder" -> refactor("containsAll", methodParams)
+         methodName == "containsInAnyOrder" -> refactor("contains", methodParams)
          methodName == "sameInstance" || methodName == "theInstance"-> refactor("isSameAs", methodParams)
          methodName == "startsWith" -> refactor("startsWith", methodParams)
          methodName == "endsWith" -> refactor("endsWith", methodParams)
@@ -257,13 +253,5 @@ class HamcrestHandler : AssertHandler {
    private fun refactorDescribedAs(expressions: Array<PsiExpression>): String {
       val args = expressions.copyOfRange(2, expressions.size).joinToString(", ") { arg -> arg.text }
       return "as(${expressions[0].text}, $args)." + refactorAssertCall(expressions[1])
-   }
-
-   private fun getStaticImports(newExpression: PsiStatement): Set<Pair<String, String>> {
-      return if (newExpression.text.contains("offset(")) {
-         hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"),
-            Pair("org.assertj.core.api.Assertions", "offset"))
-      } else
-         hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"))
    }
 }

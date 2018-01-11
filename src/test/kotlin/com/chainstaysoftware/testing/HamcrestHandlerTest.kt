@@ -18,7 +18,7 @@ import java.io.File
 
 
 // TODO: Fix tests for MatcherAssert - there is a class path issue
-// TODO: Add more tests that show recursive matchers are not supported
+// TODO: Add more tests that show recursive matchers are mostly not supported
 class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @BeforeEach
@@ -332,9 +332,25 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun handleMatcherAssert_is_nullValue()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"desc\", a, is(nullValue()))",
+         "assertThat(a)" +
+            ".as(\"desc\").isNull()")
+   }
+
+   @Test
    fun handleMatcherAssert_instanceOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, instanceOf(Cheddar.class))",
+         "assertThat(cheese)" +
+            ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
+   }
+
+   @Test
+   fun handleMatcherAssert_is_instanceOf()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"is a cheese instance\", cheese, is(instanceOf(Cheddar.class)))",
          "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
@@ -356,6 +372,14 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun handleMatcherAssert_is_any()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"is a cheese instance\", cheese, is(any(Cheddar.class)))",
+         "assertThat(cheese)" +
+            ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
+   }
+
+   @Test
    fun handleMatcherAssert_lessThan()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, lessThan(3))",
@@ -364,9 +388,25 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun handleMatcherAssert_is_lessThan()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"foo\", 2, is(lessThan(3)))",
+         "assertThat(2)" +
+            ".as(\"foo\").isLessThan(3)")
+   }
+
+   @Test
    fun handleMatcherAssert_lessThanOrEqualTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, lessThanOrEqualTo(3))",
+         "assertThat(2)" +
+            ".as(\"foo\").isLessThanOrEqualTo(3)")
+   }
+
+   @Test
+   fun handleMatcherAssert_is_lessThanOrEqualTo()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"foo\", 2, is(lessThanOrEqualTo(3)))",
          "assertThat(2)" +
             ".as(\"foo\").isLessThanOrEqualTo(3)")
    }
@@ -396,12 +436,29 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun handleMatcherAssert_is_greaterThan()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"foo\", 2, is(greaterThan(3)))",
+         "assertThat(2)" +
+            ".as(\"foo\").isGreaterThan(3)")
+   }
+
+   @Test
    fun handleMatcherAssert_greaterThanOrEqualTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, greaterThanOrEqualTo(3))",
          "assertThat(2)" +
             ".as(\"foo\").isGreaterThanOrEqualTo(3)")
    }
+
+   @Test
+   fun handleMatcherAssert_is_greaterThanOrEqualTo()  {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"foo\", 2, is(greaterThanOrEqualTo(3)))",
+         "assertThat(2)" +
+            ".as(\"foo\").isGreaterThanOrEqualTo(3)")
+   }
+
 
    @Test
    fun handleMatcherAssert_greaterThan_Instant()  {
@@ -434,7 +491,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
          "assertThat(\"foo\", Arrays.asList(\"foo\", \"bar\"), " +
             "containsInAnyOrder(\"foo\", \"bar\"))",
          "assertThat(Arrays.asList(\"foo\", \"bar\"))" +
-            ".as(\"foo\").containsAll(\"foo\", \"bar\")")
+            ".as(\"foo\").contains(\"foo\", \"bar\")")
    }
 
    @Test

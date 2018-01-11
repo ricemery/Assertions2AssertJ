@@ -1,11 +1,11 @@
 package com.chainstaysoftware.testing
 
+import com.chainstaysoftware.testing.Util.isQualifiedClass
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiExpression
 import com.intellij.psi.PsiExpressionList
-import com.intellij.psi.PsiStatement
 
 /**
  * Handler to convert Junit Assertions (excluding assertThat) to AssertJ Assertions.
@@ -60,14 +60,6 @@ class JunitHandler : AssertHandler {
       } else {
          return emptyImports
       }
-   }
-
-   private fun getStaticImports(newExpression: PsiStatement): Set<Pair<String, String>> {
-      return if (newExpression.text.contains("offset(")) {
-         hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"),
-            Pair("org.assertj.core.api.Assertions", "offset"))
-      } else
-         hashSetOf(Pair("org.assertj.core.api.Assertions", "assertThat"))
    }
 
    private fun refactorAssertEquals(junit4: Boolean, expressions: Array<PsiExpression>): String {

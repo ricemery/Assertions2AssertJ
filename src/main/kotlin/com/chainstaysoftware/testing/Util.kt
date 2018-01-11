@@ -122,6 +122,25 @@ object Util {
    }
 
    /**
+    * Returns true if the passed in {@link PsiElement} is
+    * a {@link PsiMethodCallExpression} and has a qualified name that
+    * equals the qualifiedClassName param.
+    */
+   fun isQualifiedClass(psiElement: PsiElement,
+                        qualifiedClassName: String): Boolean {
+      if (psiElement !is PsiMethodCallExpression) {
+         return false
+      }
+
+      val resolvedMethod = psiElement.resolveMethod()
+      if (resolvedMethod == null || resolvedMethod.containingClass == null) {
+         return false
+      }
+
+      return qualifiedClassName == resolvedMethod.containingClass!!.qualifiedName
+   }
+
+   /**
     * True if PsiElement is a PsiImportStatement or PsiImportStaticStatement and
     * the PsiElement's qualified name == the passed in qualifiedName.
     */

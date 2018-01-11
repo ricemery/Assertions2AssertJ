@@ -14,7 +14,7 @@ verify statements.
 * The plugin does NOT convert all assertions that utilize matchers embedded 
 within other matchers (e.g. anyOf(equalTo(1.0), equalTo(2.0))). 
 * When a file contains both assertions that are converted, and assertions that
-are ignored the Hamcrest imports will still be deleted.
+are ignored, the Hamcrest imports will still be deleted.
 * Does not support the following Hamcrest matchers
     * allOf
     * anything 

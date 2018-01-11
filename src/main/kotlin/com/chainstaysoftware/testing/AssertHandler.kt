@@ -2,7 +2,7 @@ package com.chainstaysoftware.testing
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.PsiStatement
 
 /**
  * Handler interface for conversion to AssertJ Assertions.
@@ -22,21 +22,21 @@ interface AssertHandler {
    fun handle(project: Project, psiElement: PsiElement): Set<Pair<String, String>>
 
    /**
-    * Returns true if the passed in {@link PsiElement} is
-    * a {@link PsiMethodCallExpression} and has a qualified name that
-    * equals the qualifiedClassName param.
+    * Returns the static imports required for the passed in AssertJ assert statement.
     */
-   fun isQualifiedClass(psiElement: PsiElement,
-                        qualifiedClassName: String): Boolean {
-      if (psiElement !is PsiMethodCallExpression) {
-         return false
-      }
+   fun getStaticImports(newExpression: PsiStatement): Set<Pair<String, String>> {
+      val imports = HashSet<Pair<String, String>>()
+      imports.add(Pair("org.assertj.core.api.Assertions", "assertThat"))
 
-      val resolvedMethod = psiElement.resolveMethod()
-      if (resolvedMethod == null || resolvedMethod.containingClass == null) {
-         return false
-      }
+      if (newExpression.text.contains("offset("))
+         imports.add(Pair("org.assertj.core.data.Offset", "offset"))
 
-      return qualifiedClassName == resolvedMethod.containingClass!!.qualifiedName
+      if (newExpression.text.contains("fail("))
+         imports.add(Pair("org.assertj.core.api.Assertions", "fail"))
+
+      if (newExpression.text.contains("assertThatExceptionOfType("))
+         imports.add(Pair("org.assertj.core.api.Assertions", "assertThatExceptionOfType"))
+
+      return imports
    }
 }
