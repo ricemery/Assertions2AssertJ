@@ -1,9 +1,11 @@
 # Assertions2AssertJ
 
-IntelliJ Plugin to convert Junit and Hamcrest Assertions to AssertJ
-Assertions. The conversion can be run on a single file, a module or
+Helper plugin to convert Junit and Hamcrest Assertions to AssertJ. 
+The conversion can be run on a single file, a module or
 an entire project.
 
+The plugin will aid in the conversion of assert statements, but does not support conversion
+of all Hamcrest and Junit asserts scenarios. Some manual intervention may be needed.
 
 Note that AssertJ must be included in the IntelliJ project classpath for
 the Plugin to successfully complete. 

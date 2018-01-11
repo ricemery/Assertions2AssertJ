@@ -41,7 +41,7 @@ class FileHandler {
       if (codeModified) {
          Util.removeImportStartsWith(psiFile, "org.hamcrest")
          Util.removeImportStartsWith(psiFile, "org.junit.Assert")
-         Util.removeImport(psiFile, "org.junit.jupiter.api.Assertions")
+         Util.removeImportStartsWith(psiFile, "org.junit.jupiter.api.Assertions")
 
          imports.forEach { import ->
             Util.addStaticImport(psiFile.project, psiFile, import.first, import.second)
