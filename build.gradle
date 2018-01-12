@@ -1,0 +1,67 @@
+group 'com.chainstaysoftware'
+version '1.0.01-SNAPSHOT'
+
+buildscript {
+   ext.kotlin_version = '1.2.10'
+
+   repositories {
+      maven {
+         url "https://plugins.gradle.org/m2/"
+      }
+      maven {
+         url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'
+      }
+      mavenCentral()
+   }
+   dependencies {
+      classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.10"
+      classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.2'
+      classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+   }
+}
+
+ext.junit4Version        = '4.12'
+ext.junitVintageVersion  = '4.12.2'
+ext.junitPlatformVersion = '1.0.2'
+ext.junitJupiterVersion  = '5.0.2'
+ext.log4jVersion = '2.9.0'
+
+apply plugin: 'org.jetbrains.intellij'
+apply plugin: "kotlin"
+apply plugin: 'org.junit.platform.gradle.plugin'
+
+sourceCompatibility = 1.8
+
+repositories {
+   mavenCentral()
+}
+
+junitPlatform {
+   // platformVersion '1.0.2'
+   filters {
+      engines {
+         // include 'junit-jupiter', 'junit-vintage'
+         // exclude 'custom-engine'
+      }
+      // includeClassNamePattern '.*Test'
+   }
+   // configurationParameter 'junit.jupiter.conditions.deactivate', '*'
+   // enableStandardTestTask true
+   // reportsDir file('build/test-results/junit-platform') // this is the default
+}
+
+dependencies {
+   // JUnit Jupiter API and TestEngine implementation
+   testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+   testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+
+   // If you also want to support JUnit 3 and JUnit 4 tests
+//   testCompile("junit:junit:${junit4Version}")
+//   testRuntime("org.junit.vintage:junit-vintage-engine:${junitVintageVersion}")
+
+   // To avoid compiler warnings about @API annotations in JUnit code
+   testCompileOnly('org.apiguardian:apiguardian-api:1.0.0')
+
+   testCompile 'org.assertj:assertj-core:3.9.0'
+   testCompile 'org.hamcrest:hamcrest-all:1.3'
+}
