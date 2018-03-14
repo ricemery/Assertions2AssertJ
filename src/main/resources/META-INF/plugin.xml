@@ -16,6 +16,15 @@
 the Plugin to successfully complete.</li>
 </ul>
 
+<b>Usage</b>
+<ul>
+  <li>
+  Select an item from within the Refactor -> Convert Assertions to AssertJ menu.
+  Note that the "Convert current file" and "Convert Module" items will
+  only be enabled if a file is selected within the editor.
+  </li>
+</ul>
+
 <b>Limitations</b>
 <ul>
   <li>The plugin does NOT convert Hamcrest assertions included in Mockito
