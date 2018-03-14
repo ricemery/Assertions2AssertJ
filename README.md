@@ -10,7 +10,12 @@ of all Hamcrest and Junit asserts scenarios. Some manual intervention may be nee
 Note that AssertJ must be included in the IntelliJ project classpath for
 the Plugin to successfully complete. 
 
-Limitations
+###Usage
+Select an item from within the Refactor -\> Convert Assertions to AssertJ menu.
+Note that the "Convert current file" and "Convert Module" items will
+only be enabled if a file is selected within the editor.
+
+###Limitations
 * The plugin does NOT convert Hamcrest assertions included in Mockito
 verify statements.
 * The plugin does NOT convert all assertions that utilize matchers embedded 

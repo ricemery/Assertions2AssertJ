@@ -10,6 +10,10 @@ import com.intellij.openapi.command.WriteCommandAction
  * AnAction to convert a single file.
  */
 class FileAction : AnAction() {
+   override fun update(e: AnActionEvent) {
+      e.presentation.isEnabled = Util.isPsiFileSelected(e)
+   }
+
    override fun actionPerformed(event: AnActionEvent) {
       val psiFile = event.getData(PlatformDataKeys.PSI_FILE) ?: return
 

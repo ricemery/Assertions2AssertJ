@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.chainstaysoftware.assertions2assertj</id>
   <name>Assertions2Assertj</name>
-  <version>1.0</version>
+  <version>1.0.01</version>
 
   <description><![CDATA[
   <h2>Assertions2Assert2</h2>

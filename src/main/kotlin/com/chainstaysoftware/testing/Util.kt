@@ -1,6 +1,8 @@
 package com.chainstaysoftware.testing
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.ProjectFileIndex
@@ -191,4 +193,7 @@ object Util {
          element.resolveMethod()?.containingClass?.name
       else
          null
+
+   fun isPsiFileSelected(event: AnActionEvent) =
+      event.getData(PlatformDataKeys.PSI_FILE) != null
 }

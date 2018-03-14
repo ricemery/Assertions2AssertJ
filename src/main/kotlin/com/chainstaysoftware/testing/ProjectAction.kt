@@ -22,6 +22,11 @@ class ProjectAction : AnAction() {
       val project = event.getData(PlatformDataKeys.PROJECT) ?: return
       val numFiles = numFilesToProcess(project)
 
+      if (numFiles == 0) {
+         ErrorBalloon().show(project, "No file found to process")
+         return
+      }
+
       if (!Util.inClasspath(project, "org.assertj.core.api.Assertions")) {
          ErrorBalloon().show(project, "AssertJ MUST be in the classpath")
          return

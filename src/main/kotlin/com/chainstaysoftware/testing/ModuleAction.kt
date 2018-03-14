@@ -5,11 +5,13 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.command.WriteCommandAction
+import com.intellij.openapi.module.Module
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.roots.FileIndexFacade
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.psi.PsiFile
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.indexing.FileBasedIndex
@@ -19,8 +21,12 @@ import com.intellij.util.indexing.FileBasedIndex
  * AnAction to convert a single Module.
  */
 class ModuleAction : AnAction() {
+   override fun update(e: AnActionEvent) {
+      e.presentation.isEnabled = Util.isPsiFileSelected(e)
+   }
+
    override fun actionPerformed(event: AnActionEvent) {
-      val psiFile = event.getData(PlatformDataKeys.PSI_FILE) ?: return
+      val psiFile: PsiFile = event.getData(PlatformDataKeys.PSI_FILE) ?: return
       val project = psiFile.project
 
       if (!Util.inClasspath(project, "org.assertj.core.api.Assertions")) {
@@ -28,9 +34,18 @@ class ModuleAction : AnAction() {
          return
       }
 
-      val module = FileIndexFacade.getInstance(project).getModuleForFile(psiFile.virtualFile) ?: return
-      val globalSearchScope = GlobalSearchScope.moduleScope(module)
+      val module: Module? = FileIndexFacade.getInstance(project).getModuleForFile(psiFile.virtualFile)
+      if (module == null) {
+         ErrorBalloon().show(project, "Cannot convert Module. No Module is selected. Select a file that is contained " +
+            "within the Module you would like to convert.")
+      }
+      val globalSearchScope = GlobalSearchScope.moduleScope(module!!)
       val numFiles = numFilesToProcess(project, globalSearchScope)
+
+      if (numFiles == 0) {
+         ErrorBalloon().show(project, "No file found to process")
+         return
+      }
 
       ProgressManager.getInstance().runProcessWithProgressSynchronously({
          val fileHandler = FileHandler()
