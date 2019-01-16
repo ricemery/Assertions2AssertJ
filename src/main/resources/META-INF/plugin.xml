@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.chainstaysoftware.assertions2assertj</id>
   <name>Assertions2Assertj</name>
-  <version>1.0.01</version>
+  <version>1.0.02</version>
 
   <description><![CDATA[
   <h2>Assertions2Assert2</h2>
@@ -53,11 +53,7 @@ are ignored, the Hamcrest imports will still be deleted.</li>
 
   <vendor url="https://github.com/ricemery/Assertions2AssertJ" />
 
-  <change-notes>Initial release of the plugin.</change-notes>
-
-  <change-notes><![CDATA[
-    ]]>
-  </change-notes>
+  <change-notes>Fix conversion error for Junit assertSame and assertNotSame.</change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
   <idea-version since-build="173.0"/>

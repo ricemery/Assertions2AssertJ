@@ -14,8 +14,8 @@ class JunitHandler : AssertHandler {
    private val refactorMap: Map<String, (Boolean, Array<PsiExpression>) -> String?>
       = mapOf("assertEquals" to { junit4, expressions -> refactorAssertEquals(junit4, expressions) },
       "assertNotEquals" to { junit4, expressions -> refactorAssertNotEquals(junit4, expressions) },
-      "assertSame" to { junit4, expressions -> refactorAssertEquals(junit4, expressions) },
-      "assertNotSame" to { junit4, expressions -> refactorAssertNotEquals(junit4, expressions) },
+      "assertSame" to { junit4, expressions -> refactorAssertSameAs(junit4, expressions) },
+      "assertNotSame" to { junit4, expressions -> refactorAssertNotSameAs(junit4, expressions) },
       "assertArrayEquals" to { junit4, expressions -> refactorAssertArrayEquals(junit4, expressions) },
       "assertIterableEquals" to { _, expressions -> refactorAssertIterableEquals(expressions) },
       "assertLinesMatch" to { _, expressions -> refactorAssertIterableEquals(expressions) },
@@ -106,6 +106,51 @@ class JunitHandler : AssertHandler {
             val expected = expressions[0].text
             val actual = expressions[1].text
             assertStr(actual, "isEqualTo($expected)")
+         }
+      }
+   }
+
+   private fun refactorAssertNotSameAs(junit4: Boolean, expressions: Array<PsiExpression>): String {
+      return when {
+         junit4 && expressions.size == 3 -> {
+            val desc = expressions[0].text
+            val expected = expressions[1].text
+            val actual = expressions[2].text
+            assertStr(actual, "isNotSameAs(" + expected.trim() + ")", desc)
+         }
+         expressions.size == 3 -> {
+            val expected = expressions[0].text
+            val actual = expressions[1].text
+            val desc = expressions[2].text
+            assertStr(actual, "isNotSameAs(" + expected.trim() + ")", desc)
+         }
+         else -> {
+            val expected = expressions[0].text
+            val actual = expressions[1].text
+            assertStr(actual, "isNotSameAs($expected)")
+         }
+      }
+   }
+
+
+   private fun refactorAssertSameAs(junit4: Boolean, expressions: Array<PsiExpression>): String {
+      return when {
+         junit4 && expressions.size == 3 -> {
+            val desc = expressions[0].text
+            val expected = expressions[1].text
+            val actual = expressions[2].text
+            assertStr(actual, "isSameAs(" + expected.trim() + ")", desc)
+         }
+         expressions.size == 3 -> {
+            val expected = expressions[0].text
+            val actual = expressions[1].text
+            val desc = expressions[2].text
+            assertStr(actual, "isSameAs(" + expected.trim() + ")", desc)
+         }
+         else -> {
+            val expected = expressions[0].text
+            val actual = expressions[1].text
+            assertStr(actual, "isSameAs($expected)")
          }
       }
    }

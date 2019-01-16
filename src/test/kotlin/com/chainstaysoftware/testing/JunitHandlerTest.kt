@@ -123,58 +123,58 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
 
    @Test
    fun handleAssertSame()  {
-      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertSame",
          "assertSame(2, 2)",
-         "assertThat(2).isEqualTo(2)")
+         "assertThat(2).isSameAs(2)")
    }
 
    @Test
    fun handleAssertSame_junit4()  {
       assertHandle("org.junit.Assert.assertSame",
          "assertSame(2, 2)",
-         "assertThat(2).isEqualTo(2)")
+         "assertThat(2).isSameAs(2)")
    }
 
    @Test
    fun handleAssertSame_withDesc()  {
-      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertSame",
          "assertSame(2, 2, \"foo\")",
-         "assertThat(2).as(\"foo\").isEqualTo(2)")
+         "assertThat(2).as(\"foo\").isSameAs(2)")
    }
 
    @Test
    fun handleAssertSame_junit4_withDesc()  {
       assertHandle("org.junit.Assert.assertSame",
          "assertSame(\"foo\", 2, 2)",
-         "assertThat(2).as(\"foo\").isEqualTo(2)")
+         "assertThat(2).as(\"foo\").isSameAs(2)")
    }
 
    @Test
    fun handleAssertNotSame()  {
-      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertNotSame",
          "assertNotSame(2, 2)",
-         "assertThat(2).isNotEqualTo(2)")
+         "assertThat(2).isNotSameAs(2)")
    }
 
    @Test
    fun handleAssertNotSame_junit4()  {
       assertHandle("org.junit.Assert.assertNotSame",
          "assertNotSame(2, 2)",
-         "assertThat(2).isNotEqualTo(2)")
+         "assertThat(2).isNotSameAs(2)")
    }
 
    @Test
    fun handleAssertNotSame_withDesc()  {
-      assertHandle("org.junit.jupiter.api.Assertions.assertEquals",
+      assertHandle("org.junit.jupiter.api.Assertions.assertNotSame",
          "assertNotSame(2, 2, \"foo\")",
-         "assertThat(2).as(\"foo\").isNotEqualTo(2)")
+         "assertThat(2).as(\"foo\").isNotSameAs(2)")
    }
 
    @Test
    fun handleAssertNotSame_junit4_withDesc()  {
       assertHandle("org.junit.Assert.assertNotSame",
          "assertNotSame(\"foo\", 2, 2)",
-         "assertThat(2).as(\"foo\").isNotEqualTo(2)")
+         "assertThat(2).as(\"foo\").isNotSameAs(2)")
    }
 
    @Test
