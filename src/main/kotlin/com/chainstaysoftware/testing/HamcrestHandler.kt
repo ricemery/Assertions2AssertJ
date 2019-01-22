@@ -52,7 +52,12 @@ class HamcrestHandler : AssertHandler {
          .map { child -> (child as PsiExpressionList).expressions }
          .first()
       val matcher = expressions[expressions.size - 1]
-      return okRecursive.find { prefix -> matcher.text.startsWith(prefix) } == null
+      return okRecursive.find { prefix ->
+         matcher.text
+            .replace("CoreMatchers.", "")
+            .replace("Matchers.", "")
+            .startsWith(prefix)
+      } == null
    }
 
    /**
@@ -169,7 +174,7 @@ class HamcrestHandler : AssertHandler {
    }
 
    private fun refactor(methodCall: String, expressions: Array<PsiExpression>): String =
-      "$methodCall(${expressions.joinToString(", " ){ e -> e.text }})"
+      "$methodCall(${expressions.joinToString(", ") { e -> e.text }})"
 
    private fun refactorAssertCloseTo(expressions: Array<PsiExpression>): String {
       val expected = expressions[0].text
