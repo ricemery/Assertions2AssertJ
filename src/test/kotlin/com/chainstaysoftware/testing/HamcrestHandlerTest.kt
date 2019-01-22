@@ -649,6 +649,13 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
          "assertThat(2, CoreMatchers.not(Matchers.is(2)))")
    }
 
+   @Test
+   fun assertThat_description() {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"description\", condition)",
+         "assertThat(condition).as(\"description\").isTrue()")
+   }
+
    private fun assertCanHandle(import: String,
                                methodCall: String) =
       assertCanHandle(listOf(import), methodCall)

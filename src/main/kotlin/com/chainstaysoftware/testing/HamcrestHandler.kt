@@ -94,26 +94,32 @@ class HamcrestHandler : AssertHandler {
    private fun refactorHamcrest(project: Project,
                                 matcherAssertElement: PsiElement,
                                 childElement: PsiExpressionList): Set<Pair<String, String>> {
-         val expressions = childElement.expressions
-         val newExpressionStr = when {
-            expressions.size == 3 -> "assertThat(${expressions[1].text.trim()})" +
+      val expressions = childElement.expressions
+      val newExpressionStr = when {
+         expressions.size == 2 &&
+            expressions[0] is PsiLiteralExpression &&
+            expressions[0].text.startsWith('"') ->
+            "assertThat(${expressions[1].text.trim()})" +
                ".as(${expressions[0].text.trim()})" +
-               ".${refactorAssertCall(expressions[2])}"
-            expressions.size == 2 -> "assertThat(${expressions[0].text.trim()})" +
-               ".${refactorAssertCall(expressions[1])}"
-            else -> null
-         }
+               ".isTrue()"
+         expressions.size == 3 -> "assertThat(${expressions[1].text.trim()})" +
+            ".as(${expressions[0].text.trim()})" +
+            ".${refactorAssertCall(expressions[2])}"
+         expressions.size == 2 -> "assertThat(${expressions[0].text.trim()})" +
+            ".${refactorAssertCall(expressions[1])}"
+         else -> null
+      }
 
-         if (newExpressionStr != null) {
-            val elementFactory = JavaPsiFacade.getElementFactory(project)
-            val newExpression = elementFactory
-               .createStatementFromText(newExpressionStr, null)
-            matcherAssertElement.replace(newExpression)
+      if (newExpressionStr != null) {
+         val elementFactory = JavaPsiFacade.getElementFactory(project)
+         val newExpression = elementFactory
+            .createStatementFromText(newExpressionStr, null)
+         matcherAssertElement.replace(newExpression)
 
-            return getStaticImports(newExpression)
-         } else {
-            return hashSetOf()
-         }
+         return getStaticImports(newExpression)
+      } else {
+         return hashSetOf()
+      }
    }
 
    private fun refactorAssertCall(psiExpression: PsiExpression): String {
