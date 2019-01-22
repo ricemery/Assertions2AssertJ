@@ -191,7 +191,7 @@ class HamcrestHandler : AssertHandler {
       }
 
    private fun refactorNot(expressions: Array<PsiExpression>): String =
-      refactorAssertCall(expressions[0]).replaceFirst("is", "isNot")
+      refactorAssertIs(expressions).replaceFirst("is", "isNot")
 
    private fun refactorAssertLessThan(expressions: Array<PsiExpression>,
                                       orEqual: Boolean = false): String {

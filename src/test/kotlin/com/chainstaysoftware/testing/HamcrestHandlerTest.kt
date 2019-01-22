@@ -72,10 +72,24 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
-   fun canHandleAssert_not_equalTo()  {
-      assertCanHandle(listOf("org.junit.Assert.assertThat",
-         "org.hamcrest.CoreMatchers.*"),
-         "assertThat(1, not(equalTo(2)))")
+   fun handleAssert_not_equalTo()  {
+      assertHandle("org.junit.Assert.assertThat",
+         "assertThat(1, not(equalTo(2)))",
+         "assertThat(1).isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssert_not_is()  {
+      assertHandle("org.junit.Assert.assertThat",
+         "assertThat(1, not(is(2)))",
+         "assertThat(1).isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssert_is_not()  {
+      assertHandle("org.junit.Assert.assertThat",
+         "assertThat(1, is(not(2)))",
+         "assertThat(1).isNotEqualTo(2)")
    }
 
    @Test
