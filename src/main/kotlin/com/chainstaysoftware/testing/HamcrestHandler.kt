@@ -97,8 +97,7 @@ class HamcrestHandler : AssertHandler {
       val expressions = childElement.expressions
       val newExpressionStr = when {
          expressions.size == 2 &&
-            expressions[0] is PsiLiteralExpression &&
-            expressions[0].text.startsWith('"') ->
+            isStringLiteral(expressions[0]) ->
             "assertThat(${expressions[1].text.trim()})" +
                ".as(${expressions[0].text.trim()})" +
                ".isTrue()"
@@ -121,6 +120,11 @@ class HamcrestHandler : AssertHandler {
          return hashSetOf()
       }
    }
+
+   private fun isStringLiteral(expression: PsiExpression) =
+      expression is PsiLiteralExpression &&
+         expression.type != null &&
+         expression.type?.canonicalText == "java.lang.String"
 
    private fun refactorAssertCall(psiExpression: PsiExpression): String {
       val s = psiExpression.text.trim()
