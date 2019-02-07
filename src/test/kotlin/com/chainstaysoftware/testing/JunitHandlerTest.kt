@@ -53,9 +53,15 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
-   fun canHandleAssertThat()  {
+   fun cantHandleAssertThat()  {
       assertCantHandle("org.junit.Assert.assertThat",
          "assertThat(1, equalTo(2))")
+   }
+
+   @Test
+   fun cantHandleAssertAll()  {
+      assertCantHandle("org.junit.Assert.assertAll",
+         "assertAll(() -> assertEquals(2,2))")
    }
 
    @Test

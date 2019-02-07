@@ -27,9 +27,10 @@ class JunitHandler : AssertHandler {
       "fail" to { _, expressions -> refactorFail(expressions) })
 
    override fun canHandle(psiElement: PsiElement): Boolean =
-      isQualifiedClass(psiElement, "org.junit.jupiter.api.Assertions") ||
-         (isQualifiedClass(psiElement, "org.junit.Assert") &&
-            "assertThat" != Util.getMethodName(psiElement))
+      isQualifiedClass(psiElement, "org.junit.jupiter.api.Assertions") &&
+         "assertAll" != Util.getMethodName(psiElement) ||
+         isQualifiedClass(psiElement, "org.junit.Assert") &&
+         "assertThat" != Util.getMethodName(psiElement)
 
 
    override fun handle(project: Project, psiElement: PsiElement): Set<Pair<String, String>> =

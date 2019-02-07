@@ -52,7 +52,12 @@ class HamcrestHandler : AssertHandler {
          .map { child -> (child as PsiExpressionList).expressions }
          .first()
       val matcher = expressions[expressions.size - 1]
-      return okRecursive.find { prefix -> matcher.text.startsWith(prefix) } == null
+      return okRecursive.find { prefix ->
+         matcher.text
+            .replace("CoreMatchers.", "")
+            .replace("Matchers.", "")
+            .startsWith(prefix)
+      } == null
    }
 
    /**
@@ -89,26 +94,32 @@ class HamcrestHandler : AssertHandler {
    private fun refactorHamcrest(project: Project,
                                 matcherAssertElement: PsiElement,
                                 childElement: PsiExpressionList): Set<Pair<String, String>> {
-         val expressions = childElement.expressions
-         val newExpressionStr = when {
-            expressions.size == 3 -> "assertThat(${expressions[1].text.trim()})" +
+      val expressions = childElement.expressions
+      val newExpressionStr = when {
+         expressions.size == 2 &&
+            expressions[0] is PsiLiteralExpression &&
+            expressions[0].text.startsWith('"') ->
+            "assertThat(${expressions[1].text.trim()})" +
                ".as(${expressions[0].text.trim()})" +
-               ".${refactorAssertCall(expressions[2])}"
-            expressions.size == 2 -> "assertThat(${expressions[0].text.trim()})" +
-               ".${refactorAssertCall(expressions[1])}"
-            else -> null
-         }
+               ".isTrue()"
+         expressions.size == 3 -> "assertThat(${expressions[1].text.trim()})" +
+            ".as(${expressions[0].text.trim()})" +
+            ".${refactorAssertCall(expressions[2])}"
+         expressions.size == 2 -> "assertThat(${expressions[0].text.trim()})" +
+            ".${refactorAssertCall(expressions[1])}"
+         else -> null
+      }
 
-         if (newExpressionStr != null) {
-            val elementFactory = JavaPsiFacade.getElementFactory(project)
-            val newExpression = elementFactory
-               .createStatementFromText(newExpressionStr, null)
-            matcherAssertElement.replace(newExpression)
+      if (newExpressionStr != null) {
+         val elementFactory = JavaPsiFacade.getElementFactory(project)
+         val newExpression = elementFactory
+            .createStatementFromText(newExpressionStr, null)
+         matcherAssertElement.replace(newExpression)
 
-            return getStaticImports(newExpression)
-         } else {
-            return hashSetOf()
-         }
+         return getStaticImports(newExpression)
+      } else {
+         return hashSetOf()
+      }
    }
 
    private fun refactorAssertCall(psiExpression: PsiExpression): String {
@@ -169,7 +180,7 @@ class HamcrestHandler : AssertHandler {
    }
 
    private fun refactor(methodCall: String, expressions: Array<PsiExpression>): String =
-      "$methodCall(${expressions.joinToString(", " ){ e -> e.text }})"
+      "$methodCall(${expressions.joinToString(", ") { e -> e.text }})"
 
    private fun refactorAssertCloseTo(expressions: Array<PsiExpression>): String {
       val expected = expressions[0].text
@@ -191,7 +202,7 @@ class HamcrestHandler : AssertHandler {
       }
 
    private fun refactorNot(expressions: Array<PsiExpression>): String =
-      refactorAssertCall(expressions[0]).replaceFirst("is", "isNot")
+      refactorAssertIs(expressions).replaceFirst("is", "isNot")
 
    private fun refactorAssertLessThan(expressions: Array<PsiExpression>,
                                       orEqual: Boolean = false): String {

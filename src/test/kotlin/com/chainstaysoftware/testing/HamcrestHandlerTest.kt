@@ -67,15 +67,29 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    @Test
    fun canHandleAssert_is_equalTo()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
-                              "org.hamcrest.CoreMatchers.*"),
+         "org.hamcrest.CoreMatchers.*"),
          "assertThat(1, is(equalTo(2)))")
    }
 
    @Test
-   fun canHandleAssert_not_equalTo()  {
-      assertCanHandle(listOf("org.junit.Assert.assertThat",
-         "org.hamcrest.CoreMatchers.*"),
-         "assertThat(1, not(equalTo(2)))")
+   fun handleAssert_not_equalTo()  {
+      assertHandle("org.junit.Assert.assertThat",
+         "assertThat(1, not(equalTo(2)))",
+         "assertThat(1).isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssert_not_is()  {
+      assertHandle("org.junit.Assert.assertThat",
+         "assertThat(1, not(is(2)))",
+         "assertThat(1).isNotEqualTo(2)")
+   }
+
+   @Test
+   fun handleAssert_is_not()  {
+      assertHandle("org.junit.Assert.assertThat",
+         "assertThat(1, is(not(2)))",
+         "assertThat(1).isNotEqualTo(2)")
    }
 
    @Test
@@ -629,6 +643,19 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
          "assertThat(a).as(\"some desc params - %0 %1\", \"param1\", \"param2\").isEqualTo(a)")
    }
 
+   @Test
+   fun staticReference() {
+      assertCanHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(2, CoreMatchers.not(Matchers.is(2)))")
+   }
+
+   @Test
+   fun assertThat_description() {
+      assertHandle("org.hamcrest.MatcherAssert.assertThat",
+         "assertThat(\"description\", condition)",
+         "assertThat(condition).as(\"description\").isTrue()")
+   }
+
    private fun assertCanHandle(import: String,
                                methodCall: String) =
       assertCanHandle(listOf(import), methodCall)
@@ -658,7 +685,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    private fun getJavaText(imports: List<String>, methodCall: String): String {
-      return imports.joinToString("\n") {import -> "import static $import;"} +
+      return imports.joinToString("\n") { import -> "import static $import;" } +
          "\n\n" +
          "class foo {\n" +
          "    @Test\n" +

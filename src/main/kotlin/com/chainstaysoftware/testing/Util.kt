@@ -15,12 +15,14 @@ import com.intellij.psi.PsiImportStatement
 import com.intellij.psi.PsiImportStaticStatement
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.PsiPackageStatement
 import com.intellij.psi.PsiRecursiveElementVisitor
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.indexing.FileBasedIndex
 import com.siyeh.ig.psiutils.MethodCallUtils
 import java.util.ArrayList
+
 
 
 object Util {
@@ -45,7 +47,7 @@ object Util {
             .map { virtualFile -> PsiManager.getInstance(project).findFile(virtualFile) }
       })
 
-      files.forEach{ psiFile -> if (psiFile != null) consumer(psiFile) }
+      files.forEach { psiFile -> if (psiFile != null) consumer(psiFile) }
    }
 
    /**
@@ -99,28 +101,24 @@ object Util {
    }
 
    /**
-    * Removes an import from the passed in psiFile.
+    * Removes all imports from the passed in psiFile that have paths
+    * that match the given condition.
     */
-   fun removeImport(psiFile: PsiFile, qualifiedName: String) {
+   fun removeImportIf(psiFile: PsiFile, condition: (String) -> Boolean) {
       val psiImportList = findElement(psiFile, PsiImportList::class.java)
 
       psiImportList
          ?.children
-         ?.filter { qualifiedNamesEqual(it, qualifiedName) }
+         ?.filter { val name = getQualifiedName(it);name != null && condition.invoke(name) }
          ?.forEach { it.delete() }
    }
 
-   /**
-    * Removes all imports from the passed in psiFile that have paths
-    * that start with the passed in qualifiedName.
-    */
-   fun removeImportStartsWith(psiFile: PsiFile, qualifiedName: String) {
-      val psiImportList = findElement(psiFile, PsiImportList::class.java)
-
-      psiImportList
-         ?.children
-         ?.filter { qualifiedNameStartsWith(it, qualifiedName) }
-         ?.forEach { it.delete() }
+   private fun getQualifiedName(psiElement: PsiElement?): String? {
+      return when (psiElement) {
+         is PsiImportStatement -> psiElement.qualifiedName.toString()
+         is PsiImportStaticStatement -> psiElement.importReference?.qualifiedName.toString()
+         else -> null
+      }
    }
 
    /**
