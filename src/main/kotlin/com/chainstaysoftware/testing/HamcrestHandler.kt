@@ -109,15 +109,15 @@ class HamcrestHandler : AssertHandler {
          else -> null
       }
 
-      if (newExpressionStr != null) {
+      return if (newExpressionStr != null) {
          val elementFactory = JavaPsiFacade.getElementFactory(project)
          val newExpression = elementFactory
             .createStatementFromText(newExpressionStr, null)
          matcherAssertElement.replace(newExpression)
 
-         return getStaticImports(newExpression)
+         getStaticImports(newExpression)
       } else {
-         return hashSetOf()
+         hashSetOf()
       }
    }
 
