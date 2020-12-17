@@ -53,6 +53,9 @@ are ignored, the Hamcrest imports will still be deleted.</li>
 
   <vendor url="https://github.com/ricemery/Assertions2AssertJ" />
 
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.java</depends>
+
   <change-notes>
     Fix 'java.lang.RuntimeException: com.intellij.util.IncorrectOperationException: Expression expected; got: EXPRESSION_STATEMENT'.
   </change-notes>
