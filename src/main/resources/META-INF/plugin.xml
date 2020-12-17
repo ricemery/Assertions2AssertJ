@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.chainstaysoftware.assertions2assertj</id>
   <name>Assertions2Assertj</name>
-  <version>1.0.04</version>
+  <version>1.0.05</version>
 
   <description><![CDATA[
   <h2>Assertions2Assert2</h2>
@@ -54,14 +54,11 @@ are ignored, the Hamcrest imports will still be deleted.</li>
   <vendor url="https://github.com/ricemery/Assertions2AssertJ" />
 
   <change-notes>
-    Add support for converting assertAll.
-    Add support for converting is(not(...))
-    Add support for converting assertThat("description", condition)
-    Support converting qualified method references.
+    Fix 'java.lang.RuntimeException: com.intellij.util.IncorrectOperationException: Expression expected; got: EXPRESSION_STATEMENT'.
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="173.0"/>
+  <idea-version since-build="203"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->

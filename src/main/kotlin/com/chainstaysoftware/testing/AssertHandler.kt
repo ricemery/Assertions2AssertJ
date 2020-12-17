@@ -2,6 +2,7 @@ package com.chainstaysoftware.testing
 
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiExpression
 import com.intellij.psi.PsiStatement
 
 /**
@@ -24,7 +25,7 @@ interface AssertHandler {
    /**
     * Returns the static imports required for the passed in AssertJ assert statement.
     */
-   fun getStaticImports(newExpression: PsiStatement): Set<Pair<String, String>> {
+   fun getStaticImports(newExpression: PsiExpression): Set<Pair<String, String>> {
       val imports = HashSet<Pair<String, String>>()
       imports.add(Pair("org.assertj.core.api.Assertions", "assertThat"))
 

@@ -22,11 +22,11 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
       super.setUp()
 
       val pathForJunit5 = PathUtil.getJarPathForClass(org.junit.jupiter.api.Assertions::class.java)
-      PsiTestUtil.addLibrary(myModule, "junit5", StringUtil.getPackageName(pathForJunit5, File.separatorChar),
+      PsiTestUtil.addLibrary(module, "junit5", StringUtil.getPackageName(pathForJunit5, File.separatorChar),
          StringUtil.getShortName(pathForJunit5, File.separatorChar))
 
       val pathForJunit4 = PathUtil.getJarPathForClass(Assert::class.java)
-      PsiTestUtil.addLibrary(myModule, "junit4", StringUtil.getPackageName(pathForJunit4, File.separatorChar),
+      PsiTestUtil.addLibrary(module, "junit4", StringUtil.getPackageName(pathForJunit4, File.separatorChar),
          StringUtil.getShortName(pathForJunit4, File.separatorChar))
    }
 
@@ -421,7 +421,7 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
    private fun assertCanHandle(imports: List<String>,
                                methodCall: String) {
       val java = getJavaText(imports, methodCall)
-      val myFile = myFixture.addFileToProject(myModule.name + "/p/" + "foo.java",
+      val myFile = myFixture.addFileToProject(module.name + "/p/" + "foo.java",
          java)
       assertCanHandle(myFile)
    }
@@ -433,7 +433,7 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
    private fun assertCantHandle(imports: List<String>,
                                 methodCall: String) {
       val java = getJavaText(imports, methodCall)
-      val myFile = myFixture.addFileToProject(myModule.name + "/p/" + "foo.java",
+      val myFile = myFixture.addFileToProject(module.name + "/p/" + "foo.java",
          java)
       assertCantHandle(myFile)
    }
@@ -477,7 +477,7 @@ class JunitHandlerTest : JavaCodeInsightFixtureTestCase() {
                             methodCall: String,
                             updatedMethodCall: String) {
       val java = getJavaText(import, methodCall)
-      val myFile = myFixture.addFileToProject(myModule.name + "/p/" + "foo.java",
+      val myFile = myFixture.addFileToProject(module.name + "/p/" + "foo.java",
          java)
       assertHandle(myFile, updatedMethodCall)
    }

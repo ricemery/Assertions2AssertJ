@@ -54,7 +54,7 @@ class JunitHandler : AssertHandler {
 
          val elementFactory = JavaPsiFacade.getElementFactory(project)
          val newExpression = elementFactory
-            .createStatementFromText(newExpressionStr, null)
+            .createExpressionFromText(newExpressionStr, null)
          junitAssertElement.replace(newExpression)
 
          return getStaticImports(newExpression)

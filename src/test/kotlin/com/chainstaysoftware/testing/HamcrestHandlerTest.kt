@@ -26,14 +26,14 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
       super.setUp()
 
       val pathForJunit4 = PathUtil.getJarPathForClass(Assert::class.java)
-      PsiTestUtil.addLibrary(myModule, "junit4", StringUtil.getPackageName(pathForJunit4, File.separatorChar),
+      PsiTestUtil.addLibrary(module, "junit4", StringUtil.getPackageName(pathForJunit4, File.separatorChar),
          StringUtil.getShortName(pathForJunit4, File.separatorChar))
 
       val pathForHamcrestCore = PathUtil.getJarPathForClass(MatcherAssert::class.java)
-      PsiTestUtil.addLibrary(myModule, "hamcrest-core", pathForHamcrestCore)
+      PsiTestUtil.addLibrary(module, "hamcrest-core", pathForHamcrestCore)
 
       val pathForHamcrestAll = PathUtil.getJarPathForClass(Matchers::class.java)
-      PsiTestUtil.addLibrary(myModule, "hamcrest-all", pathForHamcrestAll)
+      PsiTestUtil.addLibrary(module, "hamcrest-all", pathForHamcrestAll)
    }
 
    @AfterEach
@@ -664,7 +664,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    private fun assertCanHandle(imports: List<String>,
                                methodCall: String) {
       val java = getJavaText(imports, methodCall)
-      val myFile = myFixture.addFileToProject(myModule.name + "/p/" + "foo.java",
+      val myFile = myFixture.addFileToProject(module.name + "/p/" + "foo.java",
          java)
       assertCanHandle(myFile)
    }
@@ -676,7 +676,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    private fun assertCantHandle(imports: List<String>,
                                 methodCall: String) {
       val java = getJavaText(imports, methodCall)
-      val myFile = myFixture.addFileToProject(myModule.name + "/p/" + "foo.java",
+      val myFile = myFixture.addFileToProject(module.name + "/p/" + "foo.java",
          java)
       assertCantHandle(myFile)
    }
@@ -720,7 +720,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
                             methodCall: String,
                             updatedMethodCall: String) {
       val java = getJavaText(import, methodCall)
-      val myFile = myFixture.addFileToProject(myModule.name + "/p/" + "foo.java",
+      val myFile = myFixture.addFileToProject(module.name + "/p/" + "foo.java",
          java)
       assertHandle(myFile, updatedMethodCall)
    }
