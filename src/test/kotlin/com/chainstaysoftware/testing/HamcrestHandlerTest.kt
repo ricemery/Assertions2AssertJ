@@ -72,6 +72,13 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
    @Test
+   fun handleMatcherAssert_comparesEqualTo()  {
+      assertHandle("org.junit.Assert.assertThat",
+         "assertThat(1, comparesEqualTo(1.0))",
+         "assertThat(1).isEqualByComparingTo(1.0)")
+   }
+
+   @Test
    fun handleAssert_not_equalTo()  {
       assertHandle("org.junit.Assert.assertThat",
          "assertThat(1, not(equalTo(2)))",
