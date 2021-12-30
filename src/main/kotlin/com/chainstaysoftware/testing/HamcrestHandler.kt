@@ -144,6 +144,7 @@ class HamcrestHandler : AssertHandler {
          methodName == "equalTo" -> refactor("isEqualTo", methodParams)
          methodName == "equalToIgnoringCase" -> refactor("isEqualToIgnoringCase", methodParams)
          methodName == "equalToIgnoringWhiteSpace" -> refactor("isEqualToIgnoringWhitespace", methodParams)
+         methodName == "comparesEqualTo" -> refactor("isEqualByComparingTo", methodParams)
          methodName == "closeTo" -> refactorAssertCloseTo(methodParams)
          methodName == "hasItems" -> refactor("contains", methodParams)
          methodName == "hasItem" -> refactor("contains", methodParams)
