@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.chainstaysoftware.assertions2assertj</id>
   <name>Assertions2Assertj</name>
-  <version>1.0.06</version>
+  <version>1.0.07</version>
 
   <description><![CDATA[
   <h2>Assertions2Assert2</h2>
@@ -57,7 +57,7 @@ are ignored, the Hamcrest imports will still be deleted.</li>
   <depends>com.intellij.modules.java</depends>
 
   <change-notes>
-    Support modifying annotations for nested test classes.
+    Support conversion of 'comparesEqualTo' matcher.
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
