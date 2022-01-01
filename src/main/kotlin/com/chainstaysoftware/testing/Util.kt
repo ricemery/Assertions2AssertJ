@@ -39,9 +39,7 @@ object Util {
       val searchScope = globalSearchScope ?: GlobalSearchScope.projectScope(project)
 
       val files = ApplicationManager.getApplication().runReadAction(Computable {
-         FileBasedIndex.getInstance().getContainingFiles(
-            FileTypeIndex.NAME,
-            JavaFileType.INSTANCE,
+         FileTypeIndex.getFiles(JavaFileType.INSTANCE,
             searchScope)
             .filter { virtualFile -> projectFileIndex.isInTestSourceContent(virtualFile) }
             .map { virtualFile -> PsiManager.getInstance(project).findFile(virtualFile) }
@@ -88,9 +86,11 @@ object Util {
       val psiImportList = findElement(psiFile, PsiImportList::class.java)
 
       if (psiImportList != null) {
-         if (psiImportList.children.any { i -> i is PsiImportStaticStatement
-            && i.resolveTargetClass()!!.qualifiedName == qualifiedName
-            && i.referenceName == if (referenceName == "*") null else referenceName }) {
+         if (psiImportList.children.any { i ->
+               (i is PsiImportStaticStatement
+                  && (i.resolveTargetClass()?.qualifiedName == qualifiedName)
+                  && i.referenceName == if (referenceName == "*") null else referenceName)
+            }) {
             // we already have the reference, do not add it
             return
          }
