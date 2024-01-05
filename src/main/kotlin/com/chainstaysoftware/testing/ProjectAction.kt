@@ -55,7 +55,7 @@ class ProjectAction : AnAction() {
    }
 
    private fun numFilesToProcess(project: Project): Int {
-      val instance = ProjectFileIndex.SERVICE.getInstance(project)
+      val instance = ProjectFileIndex.getInstance(project)
       return FileTypeIndex.getFiles(JavaFileType.INSTANCE,
             GlobalSearchScope.projectScope(project))
          .filter { virtualFile -> instance.isInTestSourceContent(virtualFile) }

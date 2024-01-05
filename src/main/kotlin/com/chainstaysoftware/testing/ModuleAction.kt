@@ -72,7 +72,7 @@ class ModuleAction : AnAction() {
 
    private fun numFilesToProcess(project: Project,
                                  globalSearchScope: GlobalSearchScope): Int {
-      val instance = ProjectFileIndex.SERVICE.getInstance(project)
+      val instance = ProjectFileIndex.getInstance(project)
       return FileTypeIndex.getFiles(JavaFileType.INSTANCE,
          globalSearchScope)
          .filter { virtualFile -> instance.isInTestSourceContent(virtualFile) }

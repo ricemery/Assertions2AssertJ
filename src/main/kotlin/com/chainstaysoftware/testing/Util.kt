@@ -35,7 +35,7 @@ object Util {
    fun traverseTestFiles(project: Project,
                          consumer: (PsiFile) -> Unit,
                          globalSearchScope: GlobalSearchScope? = null) {
-      val projectFileIndex = ProjectFileIndex.SERVICE.getInstance(project)
+      val projectFileIndex = ProjectFileIndex.getInstance(project)
       val searchScope = globalSearchScope ?: GlobalSearchScope.projectScope(project)
 
       val files = ApplicationManager.getApplication().runReadAction(Computable {

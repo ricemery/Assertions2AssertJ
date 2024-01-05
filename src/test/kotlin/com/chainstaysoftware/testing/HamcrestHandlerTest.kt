@@ -8,472 +8,394 @@ import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase
 import com.intellij.util.PathUtil
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.MatcherAssert
-import org.hamcrest.Matchers
 import org.junit.Assert
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
-import org.junit.jupiter.api.Test
 import java.io.File
 
 
-// TODO: Fix tests for MatcherAssert - there is a class path issue
 // TODO: Add more tests that show recursive matchers are mostly not supported
 class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
 
-   @BeforeEach
-   fun setup() {
+   override fun setUp() {
       super.setUp()
 
       val pathForJunit4 = PathUtil.getJarPathForClass(Assert::class.java)
       PsiTestUtil.addLibrary(module, "junit4", StringUtil.getPackageName(pathForJunit4, File.separatorChar),
          StringUtil.getShortName(pathForJunit4, File.separatorChar))
-
-      val pathForHamcrestCore = PathUtil.getJarPathForClass(MatcherAssert::class.java)
-      PsiTestUtil.addLibrary(module, "hamcrest-core", pathForHamcrestCore)
-
-      val pathForHamcrestAll = PathUtil.getJarPathForClass(Matchers::class.java)
-      PsiTestUtil.addLibrary(module, "hamcrest-all", pathForHamcrestAll)
+      PsiTestUtil.addLibrary(
+         module,
+         "hamcrest",
+         PathUtil.getJarPathForClass(MatcherAssert::class.java)
+      )
    }
 
-   @AfterEach
-   fun cleanup() {
-      super.tearDown()
-   }
-
-   override fun getName(): String {
-      return "HamcrestHandlerTest"
-   }
-
-   @Disabled // Something screwy with classpath
-   @Test
-   fun canHandleMatcherAssert()  {
+   fun testCanHandleMatcherAssert()  {
       assertCanHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, equalTo(2))")
    }
 
-   @Test
-   fun canHandleAssert()  {
+   fun testcanHandleAssert()  {
       assertCanHandle("org.junit.Assert.assertThat",
          "assertThat(1, equalTo(2))")
    }
 
-   @Test
-   fun cantHandleAssert()  {
+   fun testcantHandleAssert()  {
       assertCantHandle("org.junit.Assert.assertEquals",
          "assertEquals(1, 2)")
    }
 
-   @Test
-   fun canHandleAssert_is_equalTo()  {
+   fun testcanHandleAssert_is_equalTo()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.CoreMatchers.*"),
          "assertThat(1, is(equalTo(2)))")
    }
 
-   @Test
-   fun handleMatcherAssert_comparesEqualTo()  {
+   fun testhandleMatcherAssert_comparesEqualTo()  {
       assertHandle("org.junit.Assert.assertThat",
          "assertThat(1, comparesEqualTo(1.0))",
          "assertThat(1).isEqualByComparingTo(1.0)")
    }
 
-   @Test
-   fun handleAssert_not_equalTo()  {
+   fun testhandleAssert_not_equalTo()  {
       assertHandle("org.junit.Assert.assertThat",
          "assertThat(1, not(equalTo(2)))",
          "assertThat(1).isNotEqualTo(2)")
    }
 
-   @Test
-   fun handleAssert_not_is()  {
+   fun testhandleAssert_not_is()  {
       assertHandle("org.junit.Assert.assertThat",
          "assertThat(1, not(is(2)))",
          "assertThat(1).isNotEqualTo(2)")
    }
 
-   @Test
-   fun handleAssert_is_not()  {
+   fun testhandleAssert_is_not()  {
       assertHandle("org.junit.Assert.assertThat",
          "assertThat(1, is(not(2)))",
          "assertThat(1).isNotEqualTo(2)")
    }
 
-   @Test
-   fun canHandleAssert_is_empty()  {
+   fun testcanHandleAssert_is_empty()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.Matchers.*"),
          "assertThat(new List(), is(empty())")
    }
 
-   @Test
-   fun canHandleAssert_is_emptyArray()  {
+   fun testcanHandleAssert_is_emptyArray()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.CoreMatchers.*"),
          "assertThat(new int[]{1}, is(emptyArray()))")
    }
 
-   @Test
-   fun canHandleAssert_not_emptyArray()  {
+   fun testcanHandleAssert_not_emptyArray()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.CoreMatchers.*"),
          "assertThat(new int[]{1}, not(emptyArray()))")
    }
 
-   @Test
-   fun canHandleAssert_is_emptyIterable()  {
+   fun testcanHandleAssert_is_emptyIterable()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.CoreMatchers.*"),
          "assertThat(new List(), is(emptyIterable()))")
    }
 
-   @Test
-   fun canHandleAssert_not_emptyIterable()  {
+   fun testcanHandleAssert_not_emptyIterable()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.CoreMatchers.*"),
          "assertThat(new List(), not(emptyIterable()))")
    }
 
-   @Test
-   fun cantHandleAssert_allOf()  {
+   fun testcantHandleAssert_allOf()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.Matchers.*"),
          "assertThat(new List(), allOf(is(nullValue()), is(nullValue())")
    }
 
-   @Test
-   fun cantHandleAssert_bothOf()  {
+   fun testcantHandleAssert_bothOf()  {
       assertCanHandle(listOf("org.junit.Assert.assertThat",
          "org.hamcrest.Matchers.*"),
          "assertThat(new List(), allOf(is(nullValue()), is(nullValue()))")
    }
 
-   @Disabled // Something screwy with classpath
-   @Test
-   fun cantHandleAssert_anyOf()  {
-      assertCantHandle(listOf("org.junit.Assert.assertThat",
-         "org.hamcrest.Matchers.*"),
+   fun testcantHandleAssert_anyOf()  {
+       assertCanHandle(listOf("org.junit.Assert.assertThat", "org.hamcrest.Matchers.*"),
          "assertThat(new List(), anyOf(is(nullValue()), is(not(nullValue()))")
    }
 
-   @Test
-   fun handleMatcherAssert_equalToTrue()  {
+   fun testhandleMatcherAssert_equalToTrue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", true, equalTo(true))",
          "assertThat(true).as(\"foo\").isTrue()")
    }
 
-   @Test
-   fun handleMatcherAssert_equalToFalse()  {
+   fun testhandleMatcherAssert_equalToFalse()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", false, equalTo(false))",
          "assertThat(false).as(\"foo\").isFalse()")
    }
 
-   @Test
-   fun handleMatcherAssert_isTrue()  {
+   fun testhandleMatcherAssert_isTrue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", true, is(true))",
          "assertThat(true).as(\"foo\").isTrue()")
    }
 
-   @Test
-   fun handleMatcherAssert_isFalse()  {
+   fun testhandleMatcherAssert_isFalse()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", false, is(false))",
          "assertThat(false).as(\"foo\").isFalse()")
    }
 
-   @Test
-   fun handleMatcherAssert_notTrue()  {
+   fun testhandleMatcherAssert_notTrue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", true, not(true))",
          "assertThat(true).as(\"foo\").isFalse()")
    }
 
-   @Test
-   fun handleMatcherAssert_notFalse()  {
+   fun testhandleMatcherAssert_notFalse()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", true, not(false))",
          "assertThat(true).as(\"foo\").isTrue()")
    }
 
-   @Test
-   fun handleMatcherAssert_notEmptyArray()  {
+   fun testhandleMatcherAssert_notEmptyArray()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", new byte[]{}, not(emptyArray()))",
          "assertThat(new byte[]{}).as(\"foo\").isNotEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_notEmptyIterable()  {
+   fun testhandleMatcherAssert_notEmptyIterable()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", new byte[]{}, not(emptyIterable()))",
          "assertThat(new byte[]{}).as(\"foo\").isNotEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_equalTo()  {
+   fun testhandleMatcherAssert_equalTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, equalTo(2))",
          "assertThat(2).as(\"foo\").isEqualTo(2)")
    }
 
-   @Test
-   fun handleMatcherAssert_equalToIgnoreCase()  {
+   fun testhandleMatcherAssert_equalToIgnoreCase()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", \"fOObar\", equalToIgnoringCase(\"foobar\"))",
          "assertThat(\"fOObar\").as(\"foo\").isEqualToIgnoringCase(\"foobar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_equalToIgnoreWhitespace()  {
+   fun testhandleMatcherAssert_equalToIgnoreWhitespace()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", \"fOO\tbar\", equalToIgnoringWhiteSpace(\"foobar\"))",
          "assertThat(\"fOO\tbar\").as(\"foo\").isEqualToIgnoringWhitespace(\"foobar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_closeTo()  {
+   fun testhandleMatcherAssert_closeTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2.0, closeTo(2.0, 0.0001))",
          "assertThat(2.0).as(\"foo\").isCloseTo(2.0, offset(0.0001))")
    }
 
-   @Test
-   fun handleMatcherAssert_hasItems()  {
+   fun testhandleMatcherAssert_hasItems()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", Arrays.asList(\"foo\", \"bar\", \"baz\"), hasItems(\"baz\", \"foo\"))",
          "assertThat(Arrays.asList(\"foo\", \"bar\", \"baz\"))" +
             ".as(\"desc\").contains(\"baz\", \"foo\")")
    }
 
-   @Test
-   fun handleMatcherAssert_hasItem()  {
+   fun testhandleMatcherAssert_hasItem()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", Arrays.asList(\"foo\", \"bar\", \"baz\"), hasItem(\"baz\"))",
          "assertThat(Arrays.asList(\"foo\", \"bar\", \"baz\"))" +
             ".as(\"desc\").contains(\"baz\")")
    }
 
-   @Test
-   fun handleMatcherAssert_hasEntry()  {
+   fun testhandleMatcherAssert_hasEntry()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", myMap, hasEntry(\"bar\", \"foo\"))",
          "assertThat(myMap)" +
             ".as(\"desc\").containsEntry(\"bar\", \"foo\")")
    }
 
-   @Test
-   fun handleMatcherAssert_hasKey()  {
+   fun testhandleMatcherAssert_hasKey()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", myMap, hasKey(\"bar\"))",
          "assertThat(myMap)" +
             ".as(\"desc\").containsKey(\"bar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_hasValue()  {
+   fun testhandleMatcherAssert_hasValue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", myMap, hasValue(\"bar\"))",
          "assertThat(myMap)" +
             ".as(\"desc\").containsValue(\"bar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_hasToString()  {
+   fun testhandleMatcherAssert_hasToString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", a, hasToString())",
          "assertThat(a)" +
             ".as(\"desc\").hasToString()")
    }
 
-   @Test
-   fun handleMatcherAssert_containsString()  {
+   fun testhandleMatcherAssert_containsString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"myStringOfNote\", containsString(\"ring\"))",
          "assertThat(\"myStringOfNote\")" +
             ".as(\"desc\").contains(\"ring\")")
    }
 
-   @Test
-   fun handleMatcherAssert_is()  {
+   fun testhandleMatcherAssert_is()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, is(Cheddar.class))",
          "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
-   @Test
-   fun handleMatcherAssert_isEmptyString()  {
+   fun testhandleMatcherAssert_isEmptyString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", b, isEmptyString())",
          "assertThat(b)" +
             ".as(\"desc\").isEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_notIsEmptyString()  {
+   fun testhandleMatcherAssert_notIsEmptyString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", b, not(isEmptyString()))",
          "assertThat(b)" +
             ".as(\"desc\").isNotEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_isEmptyOrNullString()  {
+   fun testhandleMatcherAssert_isEmptyOrNullString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", b, isEmptyOrNullString())",
          "assertThat(b)" +
             ".as(\"desc\").isBlank()")
    }
 
-   @Test
-   fun handleMatcherAssert_notIsEmptyOrNullString()  {
+   fun testhandleMatcherAssert_notIsEmptyOrNullString()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", b, not(isEmptyOrNullString()))",
          "assertThat(b)" +
             ".as(\"desc\").isNotBlank()")
    }
 
-   @Test
-   fun handleMatcherAssert_notNullValue()  {
+   fun testhandleMatcherAssert_notNullValue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", a, notNullValue())",
          "assertThat(a)" +
             ".as(\"desc\").isNotNull()")
    }
 
-   @Test
-   fun handleMatcherAssert_nullValue()  {
+   fun testhandleMatcherAssert_nullValue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", a, nullValue())",
          "assertThat(a)" +
             ".as(\"desc\").isNull()")
    }
 
-   @Test
-   fun handleMatcherAssert_is_nullValue()  {
+   fun testhandleMatcherAssert_is_nullValue()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", a, is(nullValue()))",
          "assertThat(a)" +
             ".as(\"desc\").isNull()")
    }
 
-   @Test
-   fun handleMatcherAssert_instanceOf()  {
+   fun testhandleMatcherAssert_instanceOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, instanceOf(Cheddar.class))",
          "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
-   @Test
-   fun handleMatcherAssert_is_instanceOf()  {
+   fun testhandleMatcherAssert_is_instanceOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, is(instanceOf(Cheddar.class)))",
          "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
-   @Test
-   fun handleMatcherAssert_typeCompatibleWith()  {
+   fun testhandleMatcherAssert_typeCompatibleWith()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, typeCompatibleWith(Cheddar.class))",
          "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
-   @Test
-   fun handleMatcherAssert_any()  {
+   fun testhandleMatcherAssert_any()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, any(Cheddar.class))",
          "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
-   @Test
-   fun handleMatcherAssert_is_any()  {
+   fun testhandleMatcherAssert_is_any()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is a cheese instance\", cheese, is(any(Cheddar.class)))",
          "assertThat(cheese)" +
             ".as(\"is a cheese instance\").isInstanceOf(Cheddar.class)")
    }
 
-   @Test
-   fun handleMatcherAssert_lessThan()  {
+   fun testhandleMatcherAssert_lessThan()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, lessThan(3))",
          "assertThat(2)" +
             ".as(\"foo\").isLessThan(3)")
    }
 
-   @Test
-   fun handleMatcherAssert_is_lessThan()  {
+   fun testhandleMatcherAssert_is_lessThan()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, is(lessThan(3)))",
          "assertThat(2)" +
             ".as(\"foo\").isLessThan(3)")
    }
 
-   @Test
-   fun handleMatcherAssert_lessThanOrEqualTo()  {
+   fun testhandleMatcherAssert_lessThanOrEqualTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, lessThanOrEqualTo(3))",
          "assertThat(2)" +
             ".as(\"foo\").isLessThanOrEqualTo(3)")
    }
 
-   @Test
-   fun handleMatcherAssert_is_lessThanOrEqualTo()  {
+   fun testhandleMatcherAssert_is_lessThanOrEqualTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, is(lessThanOrEqualTo(3)))",
          "assertThat(2)" +
             ".as(\"foo\").isLessThanOrEqualTo(3)")
    }
 
-   @Test
-   fun handleMatcherAssert_lessThan_Instant()  {
+   fun testhandleMatcherAssert_lessThan_Instant()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Instant.now(), lessThan(Instant.now()))",
          "assertThat(Instant.now())" +
             ".as(\"foo\").isBefore(Instant.now())")
    }
 
-   @Test
-   fun handleMatcherAssert_lessThanOrEqualTo_Instant()  {
+   fun testhandleMatcherAssert_lessThanOrEqualTo_Instant()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Instant.now(), lessThanOrEqualTo(Instant.now()))",
          "assertThat(Instant.now())" +
             ".as(\"foo\").isBeforeOrEqualTo(Instant.now())")
    }
 
-   @Test
-   fun handleMatcherAssert_greaterThan()  {
+   fun testhandleMatcherAssert_greaterThan()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, greaterThan(3))",
          "assertThat(2)" +
             ".as(\"foo\").isGreaterThan(3)")
    }
 
-   @Test
-   fun handleMatcherAssert_is_greaterThan()  {
+   fun testhandleMatcherAssert_is_greaterThan()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, is(greaterThan(3)))",
          "assertThat(2)" +
             ".as(\"foo\").isGreaterThan(3)")
    }
 
-   @Test
-   fun handleMatcherAssert_greaterThanOrEqualTo()  {
+   fun testhandleMatcherAssert_greaterThanOrEqualTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, greaterThanOrEqualTo(3))",
          "assertThat(2)" +
             ".as(\"foo\").isGreaterThanOrEqualTo(3)")
    }
 
-   @Test
-   fun handleMatcherAssert_is_greaterThanOrEqualTo()  {
+   fun testhandleMatcherAssert_is_greaterThanOrEqualTo()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", 2, is(greaterThanOrEqualTo(3)))",
          "assertThat(2)" +
@@ -481,24 +403,21 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
    }
 
 
-   @Test
-   fun handleMatcherAssert_greaterThan_Instant()  {
+   fun testhandleMatcherAssert_greaterThan_Instant()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Instant.now(), greaterThan(Instant.now()))",
          "assertThat(Instant.now())" +
             ".as(\"foo\").isAfter(Instant.now())")
    }
 
-   @Test
-   fun handleMatcherAssert_greaterThanOrEqualTo_Instant()  {
+   fun testhandleMatcherAssert_greaterThanOrEqualTo_Instant()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Instant.now(), greaterThanOrEqualTo(Instant.now()))",
          "assertThat(Instant.now())" +
             ".as(\"foo\").isAfterOrEqualTo(Instant.now())")
    }
 
-   @Test
-   fun handleMatcherAssert_contains()  {
+   fun testhandleMatcherAssert_contains()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Arrays.asList(\"foo\", \"bar\"), " +
             "contains(\"foo\", \"bar\"))",
@@ -506,8 +425,7 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
             ".as(\"foo\").containsExactly(\"foo\", \"bar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_containsInAnyOrder()  {
+   fun testhandleMatcherAssert_containsInAnyOrder()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"foo\", Arrays.asList(\"foo\", \"bar\"), " +
             "containsInAnyOrder(\"foo\", \"bar\"))",
@@ -515,150 +433,123 @@ class HamcrestHandlerTest : JavaCodeInsightFixtureTestCase() {
             ".as(\"foo\").contains(\"foo\", \"bar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_sameInstance()  {
+   fun testhandleMatcherAssert_sameInstance()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is the same instance\", a, sameInstance(b))",
          "assertThat(a)" +
             ".as(\"is the same instance\").isSameAs(b)")
    }
 
-   @Test
-   fun handleMatcherAssert_theInstance()  {
+   fun testhandleMatcherAssert_theInstance()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"is the same instance\", a, theInstance(b))",
          "assertThat(a)" +
             ".as(\"is the same instance\").isSameAs(b)")
    }
 
-   @Test
-   fun handleMatcherAssert_startsWith()  {
+   fun testhandleMatcherAssert_startsWith()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"fOObar\", startsWith(\"fOO\"))",
          "assertThat(\"fOObar\").as(\"desc\").startsWith(\"fOO\")")
    }
 
-   @Test
-   fun handleMatcherAssert_endsWith()  {
+   fun testhandleMatcherAssert_endsWith()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"fOObar\", endsWith(\"bar\"))",
          "assertThat(\"fOObar\").as(\"desc\").endsWith(\"bar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_allOf()  {
+   fun testhandleMatcherAssert_allOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"foobar\", allOf(startsWith(\"foo\"), containsString(\"or\")))",
          "assertThat(\"foobar\").as(\"desc\").startsWith(\"foo\").contains(\"or\")")
    }
 
-   @Test
-   fun handleMatcherAssert_both()  {
+   fun testhandleMatcherAssert_both()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", \"foobar\", both(startsWith(\"foo\"), containsString(\"or\")))",
          "assertThat(\"foobar\").as(\"desc\").startsWith(\"foo\").contains(\"or\")")
    }
 
-   @Test
-   fun arrayContainingInAnyOrder()  {
+   fun testarrayContainingInAnyOrder()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{\"foo\", \"bar\"}, arrayContaining(\"foo\", \"bar\"))",
          "assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").containsExactly(\"foo\", \"bar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_arrayContaining()  {
+   fun testhandleMatcherAssert_arrayContaining()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{\"foo\", \"bar\"}, arrayContainingInAnyOrder(\"foo\", \"bar\"))",
          "assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").contains(\"foo\", \"bar\")")
    }
 
-   @Test
-   fun handleMatcherAssert_arrayWithSize()  {
+   fun testhandleMatcherAssert_arrayWithSize()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{\"foo\", \"bar\"}, arrayWithSize(2))",
          "assertThat(new String[]{\"foo\", \"bar\"}).as(\"desc\").hasSize(2)")
    }
 
-   @Test
-   fun handleMatcherAssert_hasSize()  {
+   fun testhandleMatcherAssert_hasSize()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", a, hasSize(2))",
          "assertThat(a).as(\"desc\").hasSize(2)")
    }
 
-   @Test
-   fun handleMatcherAssert_iterableWithSize()  {
+   fun testhandleMatcherAssert_iterableWithSize()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", a, iterableWithSize(2))",
          "assertThat(a).as(\"desc\").hasSize(2)")
    }
 
-   @Test
-   fun handleMatcherAssert_empty()  {
+   fun testhandleMatcherAssert_empty()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new List(), empty())",
          "assertThat(new List()).as(\"desc\").isEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_is_empty()  {
+   fun testhandleMatcherAssert_is_empty()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new List(), is(empty()))",
          "assertThat(new List()).as(\"desc\").isEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_not_empty()  {
+   fun testhandleMatcherAssert_not_empty()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new List(), not(empty()))",
          "assertThat(new List()).as(\"desc\").isNotEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_emptyArray()  {
+   fun testhandleMatcherAssert_emptyArray()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{}, emptyArray())",
          "assertThat(new String[]{}).as(\"desc\").isEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_emptyIterable()  {
+   fun testhandleMatcherAssert_emptyIterable()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new String[]{}, emptyIterable())",
          "assertThat(new String[]{}).as(\"desc\").isEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_emptyCollectionOf()  {
+   fun testhandleMatcherAssert_emptyCollectionOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new List(), emptyCollectionOf())",
          "assertThat(new List()).as(\"desc\").isEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_is_emptyCollectionOf()  {
+   fun testhandleMatcherAssert_is_emptyCollectionOf()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"desc\", new List(), is(emptyCollectionOf()))",
          "assertThat(new List()).as(\"desc\").isEmpty()")
    }
 
-   @Test
-   fun handleMatcherAssert_describedAs()  {
+   fun testhandleMatcherAssert_describedAs()  {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(a, describedAs(\"some desc params - %0 %1\", equalTo(a), \"param1\", \"param2\"))",
          "assertThat(a).as(\"some desc params - %0 %1\", \"param1\", \"param2\").isEqualTo(a)")
    }
 
-   @Disabled // Something screwy with classpath
-   @Test
-   fun staticReference() {
-      assertCanHandle("org.hamcrest.MatcherAssert.assertThat",
-         "assertThat(2, CoreMatchers.not(Matchers.is(2)))")
-   }
-
-   @Test
-   fun assertThat_description() {
+   fun testassertThat_description() {
       assertHandle("org.hamcrest.MatcherAssert.assertThat",
          "assertThat(\"description\", condition)",
          "assertThat(condition).as(\"description\").isTrue()")

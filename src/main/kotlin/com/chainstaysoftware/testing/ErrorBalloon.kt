@@ -17,7 +17,7 @@ class ErrorBalloon {
          .createHtmlTextBalloonBuilder(htmlText, MessageType.ERROR, null)
          .setFadeoutTime(7500)
          .createBalloon()
-         .show(RelativePoint.getCenterOf(statusBar.component),
+         .show(statusBar.component?.let { RelativePoint.getCenterOf(it) },
             Balloon.Position.atRight)
    }
 }
