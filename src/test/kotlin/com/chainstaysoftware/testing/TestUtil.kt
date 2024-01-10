@@ -42,7 +42,7 @@ object TestUtil {
                     project: Project,
                     myFile: PsiFile,
                     expected: String) {
-      val psiMethodCallExpression = TestUtil.getPsiMethodCallExpression(myFile)
+      val psiMethodCallExpression = getPsiMethodCallExpression(myFile)
 
       WriteCommandAction.runWriteCommandAction(project) {
          if (psiMethodCallExpression == null)
@@ -52,7 +52,7 @@ object TestUtil {
       }
 
       ReadAction.run<IllegalStateException> {
-         val updated = TestUtil.getPsiMethodCallExpression(myFile)
+         val updated = getPsiMethodCallExpression(myFile)
          if (updated == null)
             Assertions.fail("Missing method call")
          else
