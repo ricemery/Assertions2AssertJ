@@ -51,7 +51,9 @@ are ignored, the Hamcrest imports will still be deleted.</li>
 </ul>
     ]]></description>
 
-  <vendor url="https://github.com/ricemery/Assertions2AssertJ" />
+  <vendor url="https://github.com/ricemery/Assertions2AssertJ">
+    Ric Emery
+  </vendor>
 
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.java</depends>
