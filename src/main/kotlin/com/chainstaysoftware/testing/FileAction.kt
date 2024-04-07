@@ -1,5 +1,6 @@
 package com.chainstaysoftware.testing
 
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
@@ -26,4 +27,8 @@ class FileAction : AnAction() {
          FileHandler().handle(psiFile)
       }
    }
+
+  override fun getActionUpdateThread(): ActionUpdateThread {
+    return ActionUpdateThread.EDT
+  }
 }

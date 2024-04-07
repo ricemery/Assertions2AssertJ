@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>com.chainstaysoftware.assertions2assertj</id>
   <name>Assertions2Assertj</name>
-  <version>1.0.09</version>
+  <version>1.0.10</version>
 
   <description><![CDATA[
   <h2>Assertions2Assert2</h2>
@@ -63,7 +63,7 @@ are ignored, the Hamcrest imports will still be deleted.</li>
   </change-notes>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="233"/>
+  <idea-version since-build="241"/>
 
   <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
        on how to target different products -->
