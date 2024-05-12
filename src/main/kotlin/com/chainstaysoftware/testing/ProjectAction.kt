@@ -1,6 +1,7 @@
 package com.chainstaysoftware.testing
 
 import com.intellij.ide.highlighter.JavaFileType
+import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
@@ -61,4 +62,8 @@ class ProjectAction : AnAction() {
          .filter { virtualFile -> instance.isInTestSourceContent(virtualFile) }
          .size
    }
+
+  override fun getActionUpdateThread(): ActionUpdateThread {
+    return ActionUpdateThread.BGT
+  }
 }
