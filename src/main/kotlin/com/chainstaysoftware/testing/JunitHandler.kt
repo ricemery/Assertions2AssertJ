@@ -29,7 +29,11 @@ class JunitHandler : AssertHandler {
    override fun canHandle(psiElement: PsiElement): Boolean =
       isQualifiedClass(psiElement, "org.junit.jupiter.api.Assertions") &&
          "assertAll" != Util.getMethodName(psiElement) ||
-         isQualifiedClass(psiElement, "org.junit.Assert") &&
+              (isQualifiedClass(psiElement, "org.junit.Assert") ||
+                      isQualifiedClass(psiElement, "junit.framework.TestCase") ||
+                      isQualifiedClass(psiElement, "junit.extensions.TestDecorator") ||
+                      isQualifiedClass(psiElement, "junit.tests.runner.ClassLoaderTest") ||
+                      isQualifiedClass(psiElement, "junit.tests.runner.ClassLoaderTest")) &&
          "assertThat" != Util.getMethodName(psiElement)
 
 
